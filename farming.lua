@@ -136,23 +136,6 @@ farmingFrame.BackgroundTransparency = 1
 farmingFrame.Parent = mainFrame
 tabFrames["Farming"] = farmingFrame
 
-local farmingHeader = Instance.new("Frame")
-farmingHeader.Size = UDim2.new(1, 0, 0, 22)
-farmingHeader.Position = UDim2.new(0, 0, 0, 0)
-farmingHeader.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-farmingHeader.Parent = farmingFrame
-
-local farmingLabel = Instance.new("TextLabel")
-farmingLabel.Size = UDim2.new(1, -28, 1, 0)
-farmingLabel.Position = UDim2.new(0, 4, 0, 0)
-farmingLabel.BackgroundTransparency = 1
-farmingLabel.TextColor3 = Color3.fromRGB(255,255,255)
-farmingLabel.Font = Enum.Font.SourceSansBold
-farmingLabel.TextSize = 13
-farmingLabel.Text = "Farming"
-farmingLabel.TextXAlignment = Enum.TextXAlignment.Left
-farmingLabel.Parent = farmingHeader
-
 local y = 10
 local spacing = 28
 
@@ -186,7 +169,7 @@ autoFarmBtn.MouseButton1Click:Connect(function()
 end)
 
 y = y + spacing
--- Start Auto Plant Seeds (was FarmingHold_Start)
+-- Start Auto Plant Seeds
 local autoPlantBtn = Instance.new("TextButton")
 autoPlantBtn.Size = UDim2.new(0, 170, 0, 24)
 autoPlantBtn.Position = UDim2.new(0, 10, 0, y)
@@ -214,6 +197,51 @@ autoPlantBtn.MouseButton1Click:Connect(function()
 		autoPlantBtn.Text = "Start Auto Plant Seeds"
 		autoPlantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 	end
+end)
+
+y = y + spacing
+-- Start Roll Egg
+local rollEggBtn = Instance.new("TextButton")
+rollEggBtn.Size = UDim2.new(0, 170, 0, 24)
+rollEggBtn.Position = UDim2.new(0, 10, 0, y)
+rollEggBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+rollEggBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+rollEggBtn.Font = Enum.Font.SourceSansBold
+rollEggBtn.TextSize = 13
+rollEggBtn.Text = "Start Roll Egg"
+rollEggBtn.Parent = farmingFrame
+
+local rollEggRunning = false
+rollEggBtn.MouseButton1Click:Connect(function()
+	rollEggRunning = not rollEggRunning
+	if rollEggRunning then
+		rollEggBtn.Text = "Stop Roll Egg"
+		rollEggBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		task.spawn(function()
+			while rollEggRunning and not killed do
+				network:WaitForChild("Eggs_Roll"):InvokeServer()
+				task.wait(2)
+			end
+		end)
+	else
+		rollEggBtn.Text = "Start Roll Egg"
+		rollEggBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+	end
+end)
+
+y = y + spacing
+-- Remote Spy
+local spyButton = Instance.new("TextButton")
+spyButton.Size = UDim2.new(0, 170, 0, 24)
+spyButton.Position = UDim2.new(0, 10, 0, y)
+spyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 120)
+spyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+spyButton.Font = Enum.Font.SourceSansBold
+spyButton.TextSize = 13
+spyButton.Text = "Remote Spy"
+spyButton.Parent = farmingFrame
+spyButton.MouseButton1Click:Connect(function()
+	loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpyBeta.lua"))()
 end)
 
 -- Mining Tab
@@ -437,6 +465,39 @@ potionBtn.MouseButton1Click:Connect(function()
 end)
 
 y3 = y3 + spacing3
+-- Start MiningMerchant (1-8)
+local miningMerchantBtn = Instance.new("TextButton")
+miningMerchantBtn.Size = UDim2.new(0, 170, 0, 24)
+miningMerchantBtn.Position = UDim2.new(0, 10, 0, y3)
+miningMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+miningMerchantBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+miningMerchantBtn.Font = Enum.Font.SourceSansBold
+miningMerchantBtn.TextSize = 13
+miningMerchantBtn.Text = "Start MiningMerchant (1-8)"
+miningMerchantBtn.Parent = merchantsFrame
+
+local miningMerchantRunning = false
+miningMerchantBtn.MouseButton1Click:Connect(function()
+	miningMerchantRunning = not miningMerchantRunning
+	if miningMerchantRunning then
+		miningMerchantBtn.Text = "Stop MiningMerchant (1-8)"
+		miningMerchantBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		task.spawn(function()
+			while miningMerchantRunning and not killed do
+				for i = 1, 8 do
+					network:WaitForChild("CustomMerchants_Purchase"):InvokeServer("MiningMerchant", i)
+					task.wait(0.1)
+				end
+				task.wait(1)
+			end
+		end)
+	else
+		miningMerchantBtn.Text = "Start MiningMerchant (1-8)"
+		miningMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+	end
+end)
+
+y3 = y3 + spacing3
 -- Start FarmingMerchant (1-6)
 local farmMerchantBtn = Instance.new("TextButton")
 farmMerchantBtn.Size = UDim2.new(0, 170, 0, 24)
@@ -458,7 +519,7 @@ farmMerchantBtn.MouseButton1Click:Connect(function()
 			while farmMerchantRunning and not killed do
 				for i = 1, 6 do
 					network:WaitForChild("CustomMerchants_Purchase"):InvokeServer("FarmingMerchant", i)
-					task.wait(0.3)
+					task.wait(0.1)
 				end
 				task.wait(1)
 			end
@@ -491,7 +552,7 @@ stdMerchantBtn.MouseButton1Click:Connect(function()
 			while stdMerchantRunning and not killed do
 				for i = 1, 6 do
 					network:WaitForChild("CustomMerchants_Purchase"):InvokeServer("StandardMerchant", i)
-					task.wait(0.3)
+					task.wait(0.1)
 				end
 				task.wait(1)
 			end
@@ -499,6 +560,72 @@ stdMerchantBtn.MouseButton1Click:Connect(function()
 	else
 		stdMerchantBtn.Text = "Start StandardMerchant (1-6)"
 		stdMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+	end
+end)
+
+y3 = y3 + spacing3
+-- Start FishingMerchant (1-6)
+local fishingMerchantBtn = Instance.new("TextButton")
+fishingMerchantBtn.Size = UDim2.new(0, 170, 0, 24)
+fishingMerchantBtn.Position = UDim2.new(0, 10, 0, y3)
+fishingMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+fishingMerchantBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+fishingMerchantBtn.Font = Enum.Font.SourceSansBold
+fishingMerchantBtn.TextSize = 13
+fishingMerchantBtn.Text = "Start FishingMerchant (1-6)"
+fishingMerchantBtn.Parent = merchantsFrame
+
+local fishingMerchantRunning = false
+fishingMerchantBtn.MouseButton1Click:Connect(function()
+	fishingMerchantRunning = not fishingMerchantRunning
+	if fishingMerchantRunning then
+		fishingMerchantBtn.Text = "Stop FishingMerchant (1-6)"
+		fishingMerchantBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		task.spawn(function()
+			while fishingMerchantRunning and not killed do
+				for i = 1, 6 do
+					network:WaitForChild("CustomMerchants_Purchase"):InvokeServer("FishingMerchant", i)
+					task.wait(0.1)
+				end
+				task.wait(1)
+			end
+		end)
+	else
+		fishingMerchantBtn.Text = "Start FishingMerchant (1-6)"
+		fishingMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+	end
+end)
+
+y3 = y3 + spacing3
+-- Start IceFishingMerchant (1-6)
+local iceFishingMerchantBtn = Instance.new("TextButton")
+iceFishingMerchantBtn.Size = UDim2.new(0, 170, 0, 24)
+iceFishingMerchantBtn.Position = UDim2.new(0, 10, 0, y3)
+iceFishingMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+iceFishingMerchantBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+iceFishingMerchantBtn.Font = Enum.Font.SourceSansBold
+iceFishingMerchantBtn.TextSize = 13
+iceFishingMerchantBtn.Text = "Start IceFishingMerchant (1-6)"
+iceFishingMerchantBtn.Parent = merchantsFrame
+
+local iceFishingMerchantRunning = false
+iceFishingMerchantBtn.MouseButton1Click:Connect(function()
+	iceFishingMerchantRunning = not iceFishingMerchantRunning
+	if iceFishingMerchantRunning then
+		iceFishingMerchantBtn.Text = "Stop IceFishingMerchant (1-6)"
+		iceFishingMerchantBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		task.spawn(function()
+			while iceFishingMerchantRunning and not killed do
+				for i = 1, 6 do
+					network:WaitForChild("CustomMerchants_Purchase"):InvokeServer("IceFishingMerchant", i)
+					task.wait(0.1)
+				end
+				task.wait(1)
+			end
+		end)
+	else
+		iceFishingMerchantBtn.Text = "Start IceFishingMerchant (1-6)"
+		iceFishingMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 	end
 end)
 
