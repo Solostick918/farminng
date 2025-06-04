@@ -204,126 +204,66 @@ createHamburger(farmingHeader, farmingHeader.Size.X.Offset-24, function()
 	})
 end)
 
-local function createToggleButton_Farming(name, posY, loopFunc)
-	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(0, 130, 0, 18)
-	button.Position = UDim2.new(0, 10, 0, posY)
-	button.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
-	button.Font = Enum.Font.SourceSansBold
-	button.TextSize = 11
-	button.Text = "Start " .. name
-	button.Parent = farmingFrame
+local y = 10
+local spacing = 28
 
-	local isRunning = false
-	toggles[name] = function() return isRunning and not killed end
+-- Start Auto Farm
+local autoFarmBtn = Instance.new("TextButton")
+autoFarmBtn.Size = UDim2.new(0, 170, 0, 24)
+autoFarmBtn.Position = UDim2.new(0, 10, 0, y)
+autoFarmBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+autoFarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoFarmBtn.Font = Enum.Font.SourceSansBold
+autoFarmBtn.TextSize = 13
+autoFarmBtn.Text = "Start Auto Farm"
+autoFarmBtn.Parent = farmingFrame
 
-	button.MouseButton1Click:Connect(function()
-		isRunning = not isRunning
-		if isRunning then
-			button.Text = "Stop " .. name
-			button.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-			local thread = task.spawn(function()
-				loopFunc(function() return isRunning and not killed end)
-			end)
-			runningThreads[#runningThreads+1] = thread
-		else
-			button.Text = "Start " .. name
-			button.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-		end
-	end)
-end
-
-local y = 2
-local spacing = 20
-createToggleButton_Farming("FarmingMerchant (1-6)", y, function(isRunning)
-	while isRunning() do
-		for i = 1, 6 do
-			network:WaitForChild("CustomMerchants_Purchase"):InvokeServer("FarmingMerchant", i)
-			task.wait(0.3)
-		end
-		task.wait(1)
-	end
-end)
-y = y + spacing
-createToggleButton_Farming("StandardMerchant (1-6)", y, function(isRunning)
-	while isRunning() do
-		for i = 1, 6 do
-			network:WaitForChild("CustomMerchants_Purchase"):InvokeServer("StandardMerchant", i)
-			task.wait(0.3)
-		end
-		task.wait(1)
-	end
-end)
-y = y + spacing
-createToggleButton_Farming("Loot Chest Unlock (5)", y, function(isRunning)
-	while isRunning() do
-		network:WaitForChild("LootChest_Unlock"):InvokeServer(5, false)
-		task.wait(2)
-	end
-end)
-y = y + spacing
-createToggleButton_Farming("AutoFarm", y, function(isRunning)
-	while isRunning() do
-		network:WaitForChild("Farming_AutoFarm"):FireServer()
-		task.wait(2)
-	end
-end)
-y = y + spacing
-createToggleButton_Farming("FarmingHold_Start", y, function(isRunning)
-	local id = "7bd389d1c6c941dfa53e26e2c3e0910f"
-	while isRunning() do
-		network:WaitForChild("FarmingHold_Start"):FireServer(id)
-		task.wait(2)
-	end
-end)
-y = y + spacing
-createToggleButton_Farming("Potion Vending", y, function(isRunning)
-	while isRunning() do
-		network:WaitForChild("VendingMachines_Purchase"):InvokeServer("PotionVendingMachine")
-		task.wait(2)
-	end
-end)
-y = y + spacing
-createToggleButton_Farming("Roll Egg", y, function(isRunning)
-	while isRunning() do
-		network:WaitForChild("Eggs_Roll"):InvokeServer()
-		task.wait(2)
+local autoFarmRunning = false
+autoFarmBtn.MouseButton1Click:Connect(function()
+	autoFarmRunning = not autoFarmRunning
+	if autoFarmRunning then
+		autoFarmBtn.Text = "Stop Auto Farm"
+		autoFarmBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		task.spawn(function()
+			while autoFarmRunning and not killed do
+				network:WaitForChild("Farming_AutoFarm"):FireServer()
+				task.wait(2)
+			end
+		end)
+	else
+		autoFarmBtn.Text = "Start Auto Farm"
+		autoFarmBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 	end
 end)
 
-y = y + spacing + 4
-local spyButton = Instance.new("TextButton")
-spyButton.Size = UDim2.new(0, 130, 0, 18)
-spyButton.Position = UDim2.new(0, 10, 0, y)
-spyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 120)
-spyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-spyButton.Font = Enum.Font.SourceSansBold
-spyButton.TextSize = 11
-spyButton.Text = "Remote Spy"
-spyButton.Parent = farmingFrame
-spyButton.MouseButton1Click:Connect(function()
-	loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpyBeta.lua"))()
-end)
+y = y + spacing
+-- Start Auto Plant Seeds (was FarmingHold_Start)
+local autoPlantBtn = Instance.new("TextButton")
+autoPlantBtn.Size = UDim2.new(0, 170, 0, 24)
+autoPlantBtn.Position = UDim2.new(0, 10, 0, y)
+autoPlantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+autoPlantBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoPlantBtn.Font = Enum.Font.SourceSansBold
+autoPlantBtn.TextSize = 13
+autoPlantBtn.Text = "Start Auto Plant Seeds"
+autoPlantBtn.Parent = farmingFrame
 
-y = y + spacing + 4
-local killButton = Instance.new("TextButton")
-killButton.Size = UDim2.new(0, 130, 0, 18)
-killButton.Position = UDim2.new(0, 10, 0, y)
-killButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-killButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-killButton.Font = Enum.Font.SourceSansBold
-killButton.TextSize = 11
-killButton.Text = "🛑 KILL SCRIPT"
-killButton.Parent = farmingFrame
-killButton.MouseButton1Click:Connect(function()
-	killed = true
-	for key in pairs(toggles) do
-		toggles[key] = function() return false end
-	end
-	screenGui:Destroy()
-	if screenGui:FindFirstChild("RestoreButton") then
-		screenGui.RestoreButton:Destroy()
+local autoPlantRunning = false
+autoPlantBtn.MouseButton1Click:Connect(function()
+	autoPlantRunning = not autoPlantRunning
+	if autoPlantRunning then
+		autoPlantBtn.Text = "Stop Auto Plant Seeds"
+		autoPlantBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		local id = "7bd389d1c6c941dfa53e26e2c3e0910f"
+		task.spawn(function()
+			while autoPlantRunning and not killed do
+				network:WaitForChild("FarmingHold_Start"):FireServer(id)
+				task.wait(2)
+			end
+		end)
+	else
+		autoPlantBtn.Text = "Start Auto Plant Seeds"
+		autoPlantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 	end
 end)
 
@@ -533,66 +473,101 @@ local merchantTypes = {
 	{name = "IceFishingMerchant", count = 6}
 }
 
-local y3 = 2
-for _, merchant in ipairs(merchantTypes) do
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(0, 120, 0, 16)
-	label.Position = UDim2.new(0, 10, 0, y3)
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.fromRGB(255,255,255)
-	label.Font = Enum.Font.SourceSans
-	label.TextSize = 11
-	label.Text = merchant.name
-	label.Parent = merchantsFrame
-	y3 = y3 + 18
-end
+local y3 = 10
+local spacing3 = 28
 
-local autoBuyBtn = Instance.new("TextButton")
-autoBuyBtn.Size = UDim2.new(0, 130, 0, 22)
-autoBuyBtn.Position = UDim2.new(0, 10, 0, y3)
-autoBuyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-autoBuyBtn.TextColor3 = Color3.fromRGB(255,255,255)
-autoBuyBtn.Font = Enum.Font.SourceSansBold
-autoBuyBtn.TextSize = 13
-autoBuyBtn.Text = "Auto Buy: OFF"
-autoBuyBtn.Parent = merchantsFrame
-local autoBuyActive = false
-autoBuyBtn.MouseButton1Click:Connect(function()
-	autoBuyActive = not autoBuyActive
-	autoBuyBtn.Text = autoBuyActive and "Auto Buy: ON" or "Auto Buy: OFF"
-	if autoBuyActive then
+-- Start Potion Vending
+local potionBtn = Instance.new("TextButton")
+potionBtn.Size = UDim2.new(0, 170, 0, 24)
+potionBtn.Position = UDim2.new(0, 10, 0, y3)
+potionBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+potionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+potionBtn.Font = Enum.Font.SourceSansBold
+potionBtn.TextSize = 13
+potionBtn.Text = "Start Potion Vending"
+potionBtn.Parent = merchantsFrame
+
+local potionRunning = false
+potionBtn.MouseButton1Click:Connect(function()
+	potionRunning = not potionRunning
+	if potionRunning then
+		potionBtn.Text = "Stop Potion Vending"
+		potionBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 		task.spawn(function()
-			while autoBuyActive and not killed do
-				for _, merchant in ipairs(merchantTypes) do
-					for i = 1, merchant.count do
-						network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(merchant.name, i)
-						task.wait(0.2)
-					end
-				end
-				task.wait(0.5)
+			while potionRunning and not killed do
+				network:WaitForChild("VendingMachines_Purchase"):InvokeServer("PotionVendingMachine")
+				task.wait(2)
 			end
 		end)
+	else
+		potionBtn.Text = "Start Potion Vending"
+		potionBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 	end
 end)
 
-y3 = y3 + 28
-local killButton3 = Instance.new("TextButton")
-killButton3.Size = UDim2.new(0, 130, 0, 22)
-killButton3.Position = UDim2.new(0, 10, 0, y3)
-killButton3.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-killButton3.TextColor3 = Color3.fromRGB(255, 255, 255)
-killButton3.Font = Enum.Font.SourceSansBold
-killButton3.TextSize = 13
-killButton3.Text = "🛑 KILL SCRIPT"
-killButton3.Parent = merchantsFrame
-killButton3.MouseButton1Click:Connect(function()
-	killed = true
-	for key in pairs(toggles) do
-		toggles[key] = function() return false end
+y3 = y3 + spacing3
+-- Start FarmingMerchant (1-6)
+local farmMerchantBtn = Instance.new("TextButton")
+farmMerchantBtn.Size = UDim2.new(0, 170, 0, 24)
+farmMerchantBtn.Position = UDim2.new(0, 10, 0, y3)
+farmMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+farmMerchantBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+farmMerchantBtn.Font = Enum.Font.SourceSansBold
+farmMerchantBtn.TextSize = 13
+farmMerchantBtn.Text = "Start FarmingMerchant (1-6)"
+farmMerchantBtn.Parent = merchantsFrame
+
+local farmMerchantRunning = false
+farmMerchantBtn.MouseButton1Click:Connect(function()
+	farmMerchantRunning = not farmMerchantRunning
+	if farmMerchantRunning then
+		farmMerchantBtn.Text = "Stop FarmingMerchant (1-6)"
+		farmMerchantBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		task.spawn(function()
+			while farmMerchantRunning and not killed do
+				for i = 1, 6 do
+					network:WaitForChild("CustomMerchants_Purchase"):InvokeServer("FarmingMerchant", i)
+					task.wait(0.3)
+				end
+				task.wait(1)
+			end
+		end)
+	else
+		farmMerchantBtn.Text = "Start FarmingMerchant (1-6)"
+		farmMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 	end
-	screenGui:Destroy()
-	if screenGui:FindFirstChild("RestoreButton") then
-		screenGui.RestoreButton:Destroy()
+end)
+
+y3 = y3 + spacing3
+-- Start StandardMerchant (1-6)
+local stdMerchantBtn = Instance.new("TextButton")
+stdMerchantBtn.Size = UDim2.new(0, 170, 0, 24)
+stdMerchantBtn.Position = UDim2.new(0, 10, 0, y3)
+stdMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+stdMerchantBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+stdMerchantBtn.Font = Enum.Font.SourceSansBold
+stdMerchantBtn.TextSize = 13
+stdMerchantBtn.Text = "Start StandardMerchant (1-6)"
+stdMerchantBtn.Parent = merchantsFrame
+
+local stdMerchantRunning = false
+stdMerchantBtn.MouseButton1Click:Connect(function()
+	stdMerchantRunning = not stdMerchantRunning
+	if stdMerchantRunning then
+		stdMerchantBtn.Text = "Stop StandardMerchant (1-6)"
+		stdMerchantBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		task.spawn(function()
+			while stdMerchantRunning and not killed do
+				for i = 1, 6 do
+					network:WaitForChild("CustomMerchants_Purchase"):InvokeServer("StandardMerchant", i)
+					task.wait(0.3)
+				end
+				task.wait(1)
+			end
+		end)
+	else
+		stdMerchantBtn.Text = "Start StandardMerchant (1-6)"
+		stdMerchantBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
 	end
 end)
 
