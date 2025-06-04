@@ -128,48 +128,6 @@ local toggles = {}
 local runningThreads = {}
 local killed = false
 
--- Hamburger Menu Helper
-local function createHamburger(parent, posX, callback)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0, 22, 0, 22)
-	btn.Position = UDim2.new(0, posX, 0, 0)
-	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	btn.TextColor3 = Color3.fromRGB(255,255,255)
-	btn.Font = Enum.Font.SourceSansBold
-	btn.TextSize = 18
-	btn.Text = "☰"
-	btn.Parent = parent
-	btn.AutoButtonColor = true
-	btn.MouseButton1Click:Connect(callback)
-	return btn
-end
-
--- Dropdown Helper
-local function createDropdown(parent, y, items)
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(0, 120, 0, #items*20+4)
-	frame.Position = UDim2.new(0, 30, 0, y)
-	frame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	frame.BorderSizePixel = 0
-	frame.Parent = parent
-	for i, item in ipairs(items) do
-		local btn = Instance.new("TextButton")
-		btn.Size = UDim2.new(1, -8, 0, 18)
-		btn.Position = UDim2.new(0, 4, 0, 2+(i-1)*20)
-		btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-		btn.TextColor3 = Color3.fromRGB(255,255,255)
-		btn.Font = Enum.Font.SourceSans
-		btn.TextSize = 12
-		btn.Text = item.text
-		btn.Parent = frame
-		btn.MouseButton1Click:Connect(function()
-			item.callback()
-			frame:Destroy()
-		end)
-	end
-	return frame
-end
-
 -- Farming Tab
 local farmingFrame = Instance.new("Frame")
 farmingFrame.Size = UDim2.new(1, -8, 1, -36)
@@ -194,15 +152,6 @@ farmingLabel.TextSize = 13
 farmingLabel.Text = "Farming"
 farmingLabel.TextXAlignment = Enum.TextXAlignment.Left
 farmingLabel.Parent = farmingHeader
-
-local farmingDropdown
-createHamburger(farmingHeader, farmingHeader.Size.X.Offset-24, function()
-	if farmingDropdown then farmingDropdown:Destroy() farmingDropdown = nil return end
-	farmingDropdown = createDropdown(farmingHeader, 22, {
-		{text = "Advanced Setting 1", callback = function() end},
-		{text = "Advanced Setting 2", callback = function() end},
-	})
-end)
 
 local y = 10
 local spacing = 28
@@ -292,15 +241,6 @@ miningLabel.TextSize = 13
 miningLabel.Text = "Mining"
 miningLabel.TextXAlignment = Enum.TextXAlignment.Left
 miningLabel.Parent = miningHeader
-
-local miningDropdown
-createHamburger(miningHeader, miningHeader.Size.X.Offset-24, function()
-	if miningDropdown then miningDropdown:Destroy() miningDropdown = nil return end
-	miningDropdown = createDropdown(miningHeader, 22, {
-		{text = "Advanced Mining 1", callback = function() end},
-		{text = "Advanced Mining 2", callback = function() end},
-	})
-end)
 
 local oreNames = {
 	[6] = "Dirt",
@@ -457,15 +397,6 @@ merchantsLabel.TextSize = 13
 merchantsLabel.Text = "Merchants"
 merchantsLabel.TextXAlignment = Enum.TextXAlignment.Left
 merchantsLabel.Parent = merchantsHeader
-
-local merchantsDropdown
-createHamburger(merchantsHeader, merchantsHeader.Size.X.Offset-24, function()
-	if merchantsDropdown then merchantsDropdown:Destroy() merchantsDropdown = nil return end
-	merchantsDropdown = createDropdown(merchantsHeader, 22, {
-		{text = "Advanced Vendor 1", callback = function() end},
-		{text = "Advanced Vendor 2", callback = function() end},
-	})
-end)
 
 local merchantTypes = {
 	{name = "MiningMerchant", count = 8},
