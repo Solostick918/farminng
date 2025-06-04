@@ -11,24 +11,64 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 170, 0, 230)
-mainFrame.Position = UDim2.new(0, 10, 0, 10)
+mainFrame.Size = UDim2.new(0, 200, 0, 260)
+mainFrame.Position = UDim2.new(0, 200, 0, 120)
 mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
-mainFrame.Draggable = true
 mainFrame.Parent = screenGui
+
+-- Custom Top Bar for Dragging
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1, 0, 0, 24)
+topBar.Position = UDim2.new(0, 0, 0, 0)
+topBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+topBar.BorderSizePixel = 0
+topBar.Parent = mainFrame
+
+topBar.Active = true
+topBar.Draggable = false
+
+-- Custom drag logic
+local dragging, dragInput, dragStart, startPos
+local UIS = game:GetService("UserInputService")
+
+topBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = mainFrame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+topBar.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
 
 -- Minimize Button
 local minimizeButton = Instance.new("TextButton")
 minimizeButton.Size = UDim2.new(0, 20, 0, 20)
-minimizeButton.Position = UDim2.new(1, -24, 0, 4)
+minimizeButton.Position = UDim2.new(1, -24, 0, 2)
 minimizeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 minimizeButton.Font = Enum.Font.SourceSansBold
 minimizeButton.TextSize = 12
 minimizeButton.Text = "-"
-minimizeButton.Parent = mainFrame
+minimizeButton.Parent = topBar
 
 local minimized = false
 minimizeButton.MouseButton1Click:Connect(function()
@@ -39,7 +79,7 @@ minimizeButton.MouseButton1Click:Connect(function()
 			local restoreButton = Instance.new("TextButton")
 			restoreButton.Name = "RestoreButton"
 			restoreButton.Size = UDim2.new(0, 24, 0, 24)
-			restoreButton.Position = UDim2.new(0, 10, 0, 10)
+			restoreButton.Position = UDim2.new(0, 200, 0, 120)
 			restoreButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 			restoreButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 			restoreButton.Font = Enum.Font.SourceSansBold
@@ -67,17 +107,17 @@ local function switchTab(tabName)
 	end
 end
 
-local tabY = 4
+local tabY = 2
 for i, tabName in ipairs(tabs) do
 	local tabBtn = Instance.new("TextButton")
-	tabBtn.Size = UDim2.new(0, 50, 0, 18)
-	tabBtn.Position = UDim2.new(0, 4 + (i-1)*54, 0, tabY)
+	tabBtn.Size = UDim2.new(0, 60, 0, 20)
+	tabBtn.Position = UDim2.new(0, 6 + (i-1)*64, 0, tabY)
 	tabBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 	tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	tabBtn.Font = Enum.Font.SourceSansBold
 	tabBtn.TextSize = 12
 	tabBtn.Text = tabName
-	tabBtn.Parent = mainFrame
+	tabBtn.Parent = topBar
 	tabBtn.MouseButton1Click:Connect(function()
 		switchTab(tabName)
 	end)
@@ -88,13 +128,81 @@ local toggles = {}
 local runningThreads = {}
 local killed = false
 
--- Farming Tab (reuse previous farming toggles)
+-- Hamburger Menu Helper
+local function createHamburger(parent, posX, callback)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 22, 0, 22)
+	btn.Position = UDim2.new(0, posX, 0, 0)
+	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.Font = Enum.Font.SourceSansBold
+	btn.TextSize = 18
+	btn.Text = "☰"
+	btn.Parent = parent
+	btn.AutoButtonColor = true
+	btn.MouseButton1Click:Connect(callback)
+	return btn
+end
+
+-- Dropdown Helper
+local function createDropdown(parent, y, items)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0, 120, 0, #items*20+4)
+	frame.Position = UDim2.new(0, 30, 0, y)
+	frame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	frame.BorderSizePixel = 0
+	frame.Parent = parent
+	for i, item in ipairs(items) do
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.new(1, -8, 0, 18)
+		btn.Position = UDim2.new(0, 4, 0, 2+(i-1)*20)
+		btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+		btn.TextColor3 = Color3.fromRGB(255,255,255)
+		btn.Font = Enum.Font.SourceSans
+		btn.TextSize = 12
+		btn.Text = item.text
+		btn.Parent = frame
+		btn.MouseButton1Click:Connect(function()
+			item.callback()
+			frame:Destroy()
+		end)
+	end
+	return frame
+end
+
+-- Farming Tab
 local farmingFrame = Instance.new("Frame")
-farmingFrame.Size = UDim2.new(1, -8, 1, -28)
-farmingFrame.Position = UDim2.new(0, 4, 0, 26)
+farmingFrame.Size = UDim2.new(1, -8, 1, -36)
+farmingFrame.Position = UDim2.new(0, 4, 0, 32)
 farmingFrame.BackgroundTransparency = 1
 farmingFrame.Parent = mainFrame
 tabFrames["Farming"] = farmingFrame
+
+local farmingHeader = Instance.new("Frame")
+farmingHeader.Size = UDim2.new(1, 0, 0, 22)
+farmingHeader.Position = UDim2.new(0, 0, 0, 0)
+farmingHeader.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+farmingHeader.Parent = farmingFrame
+
+local farmingLabel = Instance.new("TextLabel")
+farmingLabel.Size = UDim2.new(1, -28, 1, 0)
+farmingLabel.Position = UDim2.new(0, 4, 0, 0)
+farmingLabel.BackgroundTransparency = 1
+farmingLabel.TextColor3 = Color3.fromRGB(255,255,255)
+farmingLabel.Font = Enum.Font.SourceSansBold
+farmingLabel.TextSize = 13
+farmingLabel.Text = "Farming"
+farmingLabel.TextXAlignment = Enum.TextXAlignment.Left
+farmingLabel.Parent = farmingHeader
+
+local farmingDropdown
+createHamburger(farmingHeader, farmingHeader.Size.X.Offset-24, function()
+	if farmingDropdown then farmingDropdown:Destroy() farmingDropdown = nil return end
+	farmingDropdown = createDropdown(farmingHeader, 22, {
+		{text = "Advanced Setting 1", callback = function() end},
+		{text = "Advanced Setting 2", callback = function() end},
+	})
+end)
 
 local function createToggleButton_Farming(name, posY, loopFunc)
 	local button = Instance.new("TextButton")
@@ -221,12 +329,38 @@ end)
 
 -- Mining Tab
 local miningFrame = Instance.new("Frame")
-miningFrame.Size = UDim2.new(1, -8, 1, -28)
-miningFrame.Position = UDim2.new(0, 4, 0, 26)
+miningFrame.Size = UDim2.new(1, -8, 1, -36)
+miningFrame.Position = UDim2.new(0, 4, 0, 32)
 miningFrame.BackgroundTransparency = 1
 miningFrame.Parent = mainFrame
 miningFrame.Visible = false
 tabFrames["Mining"] = miningFrame
+
+local miningHeader = Instance.new("Frame")
+miningHeader.Size = UDim2.new(1, 0, 0, 22)
+miningHeader.Position = UDim2.new(0, 0, 0, 0)
+miningHeader.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+miningHeader.Parent = miningFrame
+
+local miningLabel = Instance.new("TextLabel")
+miningLabel.Size = UDim2.new(1, -28, 1, 0)
+miningLabel.Position = UDim2.new(0, 4, 0, 0)
+miningLabel.BackgroundTransparency = 1
+miningLabel.TextColor3 = Color3.fromRGB(255,255,255)
+miningLabel.Font = Enum.Font.SourceSansBold
+miningLabel.TextSize = 13
+miningLabel.Text = "Mining"
+miningLabel.TextXAlignment = Enum.TextXAlignment.Left
+miningLabel.Parent = miningHeader
+
+local miningDropdown
+createHamburger(miningHeader, miningHeader.Size.X.Offset-24, function()
+	if miningDropdown then miningDropdown:Destroy() miningDropdown = nil return end
+	miningDropdown = createDropdown(miningHeader, 22, {
+		{text = "Advanced Mining 1", callback = function() end},
+		{text = "Advanced Mining 2", callback = function() end},
+	})
+end)
 
 local oreNames = {
 	[6] = "Dirt",
@@ -247,10 +381,12 @@ for _, oreId in ipairs(oreOrder) do
 	local cb = Instance.new("TextButton")
 	cb.Size = UDim2.new(0, 16, 0, 16)
 	cb.Position = UDim2.new(0, 10, 0, y2)
-	cb.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	cb.TextColor3 = Color3.fromRGB(255,255,255)
-	cb.Font = Enum.Font.SourceSans
-	cb.TextSize = 11
+	cb.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+	cb.BorderSizePixel = 1
+	cb.BorderColor3 = Color3.fromRGB(180, 180, 180)
+	cb.TextColor3 = Color3.fromRGB(40,40,40)
+	cb.Font = Enum.Font.SourceSansBold
+	cb.TextSize = 13
 	cb.Text = ""
 	cb.Parent = miningFrame
 	local label = Instance.new("TextLabel")
@@ -266,6 +402,7 @@ for _, oreId in ipairs(oreOrder) do
 	cb.MouseButton1Click:Connect(function()
 		checked = not checked
 		cb.Text = checked and "✔" or ""
+		cb.TextColor3 = checked and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(40,40,40)
 	end)
 	oreCheckboxes[oreId] = function() return checked end
 	y2 = y2 + 18
@@ -274,10 +411,12 @@ end
 mineAllBox = Instance.new("TextButton")
 mineAllBox.Size = UDim2.new(0, 16, 0, 16)
 mineAllBox.Position = UDim2.new(0, 10, 0, y2)
-mineAllBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-mineAllBox.TextColor3 = Color3.fromRGB(255,255,255)
-mineAllBox.Font = Enum.Font.SourceSans
-mineAllBox.TextSize = 11
+mineAllBox.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+mineAllBox.BorderSizePixel = 1
+mineAllBox.BorderColor3 = Color3.fromRGB(180, 180, 180)
+mineAllBox.TextColor3 = Color3.fromRGB(40,40,40)
+mineAllBox.Font = Enum.Font.SourceSansBold
+mineAllBox.TextSize = 13
 mineAllBox.Text = ""
 mineAllBox.Parent = miningFrame
 local mineAllLabel = Instance.new("TextLabel")
@@ -293,6 +432,7 @@ local mineAllChecked = false
 mineAllBox.MouseButton1Click:Connect(function()
 	mineAllChecked = not mineAllChecked
 	mineAllBox.Text = mineAllChecked and "✔" or ""
+	mineAllBox.TextColor3 = mineAllChecked and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(40,40,40)
 end)
 y2 = y2 + 20
 
@@ -354,19 +494,45 @@ end)
 
 -- Merchants Tab
 local merchantsFrame = Instance.new("Frame")
-merchantsFrame.Size = UDim2.new(1, -8, 1, -28)
-merchantsFrame.Position = UDim2.new(0, 4, 0, 26)
+merchantsFrame.Size = UDim2.new(1, -8, 1, -36)
+merchantsFrame.Position = UDim2.new(0, 4, 0, 32)
 merchantsFrame.BackgroundTransparency = 1
 merchantsFrame.Parent = mainFrame
 merchantsFrame.Visible = false
 tabFrames["Merchants"] = merchantsFrame
+
+local merchantsHeader = Instance.new("Frame")
+merchantsHeader.Size = UDim2.new(1, 0, 0, 22)
+merchantsHeader.Position = UDim2.new(0, 0, 0, 0)
+merchantsHeader.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+merchantsHeader.Parent = merchantsFrame
+
+local merchantsLabel = Instance.new("TextLabel")
+merchantsLabel.Size = UDim2.new(1, -28, 1, 0)
+merchantsLabel.Position = UDim2.new(0, 4, 0, 0)
+merchantsLabel.BackgroundTransparency = 1
+merchantsLabel.TextColor3 = Color3.fromRGB(255,255,255)
+merchantsLabel.Font = Enum.Font.SourceSansBold
+merchantsLabel.TextSize = 13
+merchantsLabel.Text = "Merchants"
+merchantsLabel.TextXAlignment = Enum.TextXAlignment.Left
+merchantsLabel.Parent = merchantsHeader
+
+local merchantsDropdown
+createHamburger(merchantsHeader, merchantsHeader.Size.X.Offset-24, function()
+	if merchantsDropdown then merchantsDropdown:Destroy() merchantsDropdown = nil return end
+	merchantsDropdown = createDropdown(merchantsHeader, 22, {
+		{text = "Advanced Vendor 1", callback = function() end},
+		{text = "Advanced Vendor 2", callback = function() end},
+	})
+end)
 
 local merchantTypes = {
 	{name = "MiningMerchant", count = 8},
 	{name = "FishingMerchant", count = 6},
 	{name = "IceFishingMerchant", count = 6}
 }
-local merchantCheckboxes = {}
+
 local y3 = 2
 for _, merchant in ipairs(merchantTypes) do
 	local label = Instance.new("TextLabel")
@@ -378,34 +544,16 @@ for _, merchant in ipairs(merchantTypes) do
 	label.TextSize = 11
 	label.Text = merchant.name
 	label.Parent = merchantsFrame
-	y3 = y3 + 16
-	for i = 1, merchant.count do
-		local cb = Instance.new("TextButton")
-		cb.Size = UDim2.new(0, 16, 0, 16)
-		cb.Position = UDim2.new(0, 20 + (i-1)*18, 0, y3)
-		cb.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-		cb.TextColor3 = Color3.fromRGB(255,255,255)
-		cb.Font = Enum.Font.SourceSans
-		cb.TextSize = 11
-		cb.Text = ""
-		cb.Parent = merchantsFrame
-		local checked = false
-		cb.MouseButton1Click:Connect(function()
-			checked = not checked
-			cb.Text = checked and "✔" or ""
-		end)
-		merchantCheckboxes[merchant.name .. i] = function() return checked end
-	end
 	y3 = y3 + 18
 end
 
 local autoBuyBtn = Instance.new("TextButton")
-autoBuyBtn.Size = UDim2.new(0, 90, 0, 18)
+autoBuyBtn.Size = UDim2.new(0, 130, 0, 22)
 autoBuyBtn.Position = UDim2.new(0, 10, 0, y3)
 autoBuyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 autoBuyBtn.TextColor3 = Color3.fromRGB(255,255,255)
 autoBuyBtn.Font = Enum.Font.SourceSansBold
-autoBuyBtn.TextSize = 11
+autoBuyBtn.TextSize = 13
 autoBuyBtn.Text = "Auto Buy: OFF"
 autoBuyBtn.Parent = merchantsFrame
 local autoBuyActive = false
@@ -417,10 +565,8 @@ autoBuyBtn.MouseButton1Click:Connect(function()
 			while autoBuyActive and not killed do
 				for _, merchant in ipairs(merchantTypes) do
 					for i = 1, merchant.count do
-						if merchantCheckboxes[merchant.name .. i]() then
-							network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(merchant.name, i)
-							task.wait(0.2)
-						end
+						network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(merchant.name, i)
+						task.wait(0.2)
 					end
 				end
 				task.wait(0.5)
@@ -429,14 +575,14 @@ autoBuyBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-y3 = y3 + 24
+y3 = y3 + 28
 local killButton3 = Instance.new("TextButton")
-killButton3.Size = UDim2.new(0, 90, 0, 18)
+killButton3.Size = UDim2.new(0, 130, 0, 22)
 killButton3.Position = UDim2.new(0, 10, 0, y3)
 killButton3.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 killButton3.TextColor3 = Color3.fromRGB(255, 255, 255)
 killButton3.Font = Enum.Font.SourceSansBold
-killButton3.TextSize = 11
+killButton3.TextSize = 13
 killButton3.Text = "🛑 KILL SCRIPT"
 killButton3.Parent = merchantsFrame
 killButton3.MouseButton1Click:Connect(function()
