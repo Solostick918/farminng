@@ -366,6 +366,59 @@ local killBtn, yS2 = createFlatButton(settingsScroll, "🛑 KILL SCRIPT", yS, BU
 	screenGui:Destroy()
 end)
 
+-- Game Optimizations Section
+local yOpt = createSectionHeader(settingsScroll, "Game Optimizations", yS)
+
+-- 1. Disable Particle Effects
+local particlesDisabled = false
+local function setParticlesDisabled(val)
+	particlesDisabled = val
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") then
+			obj.Enabled = not val
+		end
+	end
+end
+local particleBtn, yOpt2 = createFlatButton(settingsScroll, "Disable Particle Effects", yOpt, BUTTON_BG, BUTTON_BORDER, function()
+	setParticlesDisabled(not particlesDisabled)
+	particleBtn.Text = (particlesDisabled and "Enable Particle Effects") or "Disable Particle Effects"
+end)
+
+-- 2. Remove Post-Processing Effects
+local effectsDisabled = false
+local postEffects = {"BlurEffect", "BloomEffect", "SunRaysEffect", "ColorCorrectionEffect", "DepthOfFieldEffect"}
+local function setEffectsDisabled(val)
+	effectsDisabled = val
+	for _, effectName in ipairs(postEffects) do
+		local effect = game.Lighting:FindFirstChild(effectName)
+		if effect then
+			effect.Enabled = not val
+		end
+	end
+end
+local effectsBtn, yOpt3 = createFlatButton(settingsScroll, "Disable Post-Processing Effects", yOpt2, BUTTON_BG, BUTTON_BORDER, function()
+	setEffectsDisabled(not effectsDisabled)
+	effectsBtn.Text = (effectsDisabled and "Enable Post-Processing Effects") or "Disable Post-Processing Effects"
+end)
+
+-- 3. Speed Up/Stop Local Animations
+local animsDisabled = false
+local function setAnimsDisabled(val)
+	animsDisabled = val
+	local char = player.Character or player.CharacterAdded:Wait()
+	for _, track in ipairs(char:FindFirstChildOfClass("Humanoid"):GetPlayingAnimationTracks()) do
+		if val then
+			track:AdjustSpeed(100)
+		else
+			track:AdjustSpeed(1)
+		end
+	end
+end
+local animBtn, yOpt4 = createFlatButton(settingsScroll, "Speed Up/Stop Local Animations", yOpt3, BUTTON_BG, BUTTON_BORDER, function()
+	setAnimsDisabled(not animsDisabled)
+	animBtn.Text = (animsDisabled and "Enable Local Animations") or "Speed Up/Stop Local Animations"
+end)
+
 -- Mining Tab
 local miningFrame = Instance.new("Frame")
 miningFrame.Size = UDim2.new(1, 0, 1, -40)
