@@ -29,7 +29,7 @@ local FONT = Enum.Font.SourceSans
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 420, 0, 420)
+mainFrame.Size = UDim2.new(0, 320, 0, 320)
 mainFrame.Position = UDim2.new(0, 200, 0, 120)
 mainFrame.BackgroundColor3 = BG_COLOR
 mainFrame.BorderColor3 = BORDER_COLOR
@@ -49,7 +49,7 @@ local tabs = {"Farming", "Mining", "Merchants"}
 local tabFrames = {}
 local selectedTab = "Farming"
 local tabBtnX = 8
-local tabBtnW = 110
+local tabBtnW = 80
 for i, tabName in ipairs(tabs) do
 	local tabBtn = Instance.new("TextButton")
 	tabBtn.Size = UDim2.new(0, tabBtnW, 0, 28)
@@ -93,17 +93,17 @@ local function createSectionHeader(parent, text, y)
 	return y + 36
 end
 
--- Flat Button Helper
+-- Flat Button Helper (smaller)
 local function createFlatButton(parent, text, y, color, borderColor, callback)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, -24, 0, 32)
-	btn.Position = UDim2.new(0, 12, 0, y)
+	btn.Size = UDim2.new(1, -20, 0, 24)
+	btn.Position = UDim2.new(0, 10, 0, y)
 	btn.BackgroundColor3 = color or BUTTON_BG
 	btn.BorderColor3 = borderColor or BUTTON_BORDER
 	btn.BorderSizePixel = 1
 	btn.TextColor3 = BUTTON_TEXT
 	btn.Font = FONT
-	btn.TextSize = 16
+	btn.TextSize = 13
 	btn.Text = text
 	btn.Parent = parent
 	btn.MouseEnter:Connect(function()
@@ -113,34 +113,34 @@ local function createFlatButton(parent, text, y, color, borderColor, callback)
 		btn.BackgroundColor3 = color or BUTTON_BG
 	end)
 	btn.MouseButton1Click:Connect(callback)
-	return btn, y + 40
+	return btn, y + 28
 end
 
--- Flat Checkbox Helper
+-- Flat Checkbox Helper (smaller)
 local function createFlatCheckbox(parent, text, y, checkedCallback)
 	local cbFrame = Instance.new("Frame")
-	cbFrame.Size = UDim2.new(1, -24, 0, 28)
-	cbFrame.Position = UDim2.new(0, 12, 0, y)
+	cbFrame.Size = UDim2.new(1, -20, 0, 22)
+	cbFrame.Position = UDim2.new(0, 10, 0, y)
 	cbFrame.BackgroundTransparency = 1
 	cbFrame.Parent = parent
 	local cb = Instance.new("TextButton")
-	cb.Size = UDim2.new(0, 22, 0, 22)
+	cb.Size = UDim2.new(0, 16, 0, 16)
 	cb.Position = UDim2.new(0, 0, 0, 3)
 	cb.BackgroundColor3 = CHECKBOX_UNCHECKED
 	cb.BorderColor3 = CHECKBOX_BORDER
 	cb.BorderSizePixel = 1
 	cb.TextColor3 = CHECKBOX_CHECKED
 	cb.Font = FONT
-	cb.TextSize = 18
+	cb.TextSize = 13
 	cb.Text = ""
 	cb.Parent = cbFrame
 	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, -28, 1, 0)
-	label.Position = UDim2.new(0, 28, 0, 0)
+	label.Size = UDim2.new(1, -20, 1, 0)
+	label.Position = UDim2.new(0, 20, 0, 0)
 	label.BackgroundTransparency = 1
 	label.TextColor3 = BUTTON_TEXT
 	label.Font = FONT
-	label.TextSize = 16
+	label.TextSize = 13
 	label.Text = text
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Parent = cbFrame
@@ -157,7 +157,7 @@ local function createFlatCheckbox(parent, text, y, checkedCallback)
 	cb.MouseLeave:Connect(function()
 		cb.BackgroundColor3 = checked and CHECKBOX_CHECKED or CHECKBOX_UNCHECKED
 	end)
-	return cb, y + 32, function() return checked end, function(val)
+	return cb, y + 22, function() return checked end, function(val)
 		checked = val
 		cb.Text = checked and "■" or ""
 		cb.BackgroundColor3 = checked and CHECKBOX_CHECKED or CHECKBOX_UNCHECKED
@@ -224,38 +224,42 @@ local y = 0
 y = createSectionHeader(farmingScroll, "Auto Actions", y)
 
 -- Start Auto Farm
-local autoFarmState = {debounce = false, running = false}
+local autoFarmState = {debounce = false, running = false, thread = nil}
 local autoFarmBtn, y2 = createFlatButton(farmingScroll, "Start Auto Farm", y, BUTTON_BG, BUTTON_BORDER, function()
 	if not debounceToggle(autoFarmState, "debounce") then return end
 	autoFarmState.running = not autoFarmState.running
 	autoFarmBtn.Text = autoFarmState.running and "Stop Auto Farm" or "Start Auto Farm"
-	autoFarmBtn.BackgroundColor3 = autoFarmState.running and BUTTON_BG or BUTTON_BG
+	autoFarmBtn.BackgroundColor3 = autoFarmState.running and CHECKBOX_CHECKED or BUTTON_BG
 	if autoFarmState.running then
-		startLoop("AutoFarm", function()
-			network:WaitForChild("Farming_AutoFarm"):FireServer()
-			task.wait(2)
+		autoFarmState.thread = task.spawn(function()
+			while autoFarmState.running and not killed do
+				network:WaitForChild("Farming_AutoFarm"):FireServer()
+				task.wait(2)
+			end
 		end)
 	else
-		stopLoop("AutoFarm")
+		if autoFarmState.thread then task.cancel(autoFarmState.thread) end
 	end
 end)
 y = y2
 
 -- Start Auto Plant Seeds
-local autoPlantState = {debounce = false, running = false}
+local autoPlantState = {debounce = false, running = false, thread = nil}
 local autoPlantBtn, y2 = createFlatButton(farmingScroll, "Start Auto Plant Seeds", y, BUTTON_BG, BUTTON_BORDER, function()
 	if not debounceToggle(autoPlantState, "debounce") then return end
 	autoPlantState.running = not autoPlantState.running
 	autoPlantBtn.Text = autoPlantState.running and "Stop Auto Plant Seeds" or "Start Auto Plant Seeds"
-	autoPlantBtn.BackgroundColor3 = autoPlantState.running and BUTTON_BG or BUTTON_BG
+	autoPlantBtn.BackgroundColor3 = autoPlantState.running and CHECKBOX_CHECKED or BUTTON_BG
 	if autoPlantState.running then
-		startLoop("AutoPlant", function()
+		autoPlantState.thread = task.spawn(function()
 			local id = "7bd389d1c6c941dfa53e26e2c3e0910f"
-			network:WaitForChild("FarmingHold_Start"):FireServer(id)
-			task.wait(2)
+			while autoPlantState.running and not killed do
+				network:WaitForChild("FarmingHold_Start"):FireServer(id)
+				task.wait(2)
+			end
 		end)
 	else
-		stopLoop("AutoPlant")
+		if autoPlantState.thread then task.cancel(autoPlantState.thread) end
 	end
 end)
 y = y2
