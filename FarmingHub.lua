@@ -419,6 +419,127 @@ local animBtn, yOpt4 = createFlatButton(settingsScroll, "Speed Up/Stop Local Ani
 	animBtn.Text = (animsDisabled and "Enable Local Animations") or "Speed Up/Stop Local Animations"
 end)
 
+-- 4. Hide Other Players' Pets
+local petsHidden = false
+local function setPetsHidden(val)
+	petsHidden = val
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Model") and obj.Name == "Pet" and obj:FindFirstChild("Owner") and obj.Owner.Value ~= player.Name then
+			obj.Parent = val and nil or workspace
+		end
+	end
+end
+local petsBtn, yOpt5 = createFlatButton(settingsScroll, "Hide Other Players' Pets", yOpt4, BUTTON_BG, BUTTON_BORDER, function()
+	setPetsHidden(not petsHidden)
+	petsBtn.Text = (petsHidden and "Show Other Players' Pets") or "Hide Other Players' Pets"
+end)
+
+-- 5. Hide Accessories
+local accessoriesHidden = false
+local function setAccessoriesHidden(val)
+	accessoriesHidden = val
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Accessory") then
+			obj.Handle.Transparency = val and 1 or 0
+		end
+	end
+end
+local accBtn, yOpt6 = createFlatButton(settingsScroll, "Hide Accessories", yOpt5, BUTTON_BG, BUTTON_BORDER, function()
+	setAccessoriesHidden(not accessoriesHidden)
+	accBtn.Text = (accessoriesHidden and "Show Accessories") or "Hide Accessories"
+end)
+
+-- 6. Hide Decorative Map Objects
+local decorHidden = false
+local function setDecorHidden(val)
+	decorHidden = val
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("BasePart") and obj.Name:lower():find("tree") or obj.Name:lower():find("rock") or obj.Name:lower():find("bush") then
+			obj.Transparency = val and 1 or 0
+			obj.CanCollide = not val
+		end
+	end
+end
+local decorBtn, yOpt7 = createFlatButton(settingsScroll, "Hide Decorative Map Objects", yOpt6, BUTTON_BG, BUTTON_BORDER, function()
+	setDecorHidden(not decorHidden)
+	decorBtn.Text = (decorHidden and "Show Decorative Objects") or "Hide Decorative Map Objects"
+end)
+
+-- 7. Mute Non-Essential Sounds
+local soundsMuted = false
+local function setSoundsMuted(val)
+	soundsMuted = val
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Sound") and (obj.Name:lower():find("music") or obj.Name:lower():find("pet") or obj.Name:lower():find("ambience")) then
+			obj.Volume = val and 0 or 1
+		end
+	end
+end
+local soundBtn, yOpt8 = createFlatButton(settingsScroll, "Mute Non-Essential Sounds", yOpt7, BUTTON_BG, BUTTON_BORDER, function()
+	setSoundsMuted(not soundsMuted)
+	soundBtn.Text = (soundsMuted and "Unmute Sounds") or "Mute Non-Essential Sounds"
+end)
+
+-- 8. Disable UI Animations
+local uiAnimDisabled = false
+local function setUIAnimDisabled(val)
+	uiAnimDisabled = val
+	for _, obj in ipairs(screenGui:GetDescendants()) do
+		if obj:IsA("Frame") or obj:IsA("TextLabel") or obj:IsA("TextButton") then
+			obj.TweenPosition = function(...) obj.Position = select(2, ...) end
+			obj.TweenSize = function(...) obj.Size = select(2, ...) end
+		end
+	end
+end
+local uiAnimBtn, yOpt9 = createFlatButton(settingsScroll, "Disable UI Animations", yOpt8, BUTTON_BG, BUTTON_BORDER, function()
+	setUIAnimDisabled(not uiAnimDisabled)
+	uiAnimBtn.Text = (uiAnimDisabled and "Enable UI Animations") or "Disable UI Animations"
+end)
+
+-- 9. Lower Render Distance
+local renderLow = false
+local function setRenderLow(val)
+	renderLow = val
+	local cam = workspace.CurrentCamera
+	if cam then
+		cam.FarPlane = val and 200 or 1000
+	end
+end
+local renderBtn, yOpt10 = createFlatButton(settingsScroll, "Lower Render Distance", yOpt9, BUTTON_BG, BUTTON_BORDER, function()
+	setRenderLow(not renderLow)
+	renderBtn.Text = (renderLow and "Restore Render Distance") or "Lower Render Distance"
+end)
+
+-- 10. Disable/Replace High-Res Decals
+local decalsDisabled = false
+local function setDecalsDisabled(val)
+	decalsDisabled = val
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Decal") or obj:IsA("Texture") then
+			obj.Transparency = val and 1 or 0
+		end
+	end
+end
+local decalBtn, yOpt11 = createFlatButton(settingsScroll, "Disable High-Res Decals", yOpt10, BUTTON_BG, BUTTON_BORDER, function()
+	setDecalsDisabled(not decalsDisabled)
+	decalBtn.Text = (decalsDisabled and "Enable Decals") or "Disable High-Res Decals"
+end)
+
+-- 11. Force Low-Quality Lighting
+local lightingLow = false
+local function setLightingLow(val)
+	lightingLow = val
+	if val then
+		game.Lighting.Technology = Enum.Technology.Compatibility
+	else
+		game.Lighting.Technology = Enum.Technology.ShadowMap
+	end
+end
+local lightingBtn, yOpt12 = createFlatButton(settingsScroll, "Force Low-Quality Lighting", yOpt11, BUTTON_BG, BUTTON_BORDER, function()
+	setLightingLow(not lightingLow)
+	lightingBtn.Text = (lightingLow and "Restore Lighting Quality") or "Force Low-Quality Lighting"
+end)
+
 -- Mining Tab
 local miningFrame = Instance.new("Frame")
 miningFrame.Size = UDim2.new(1, 0, 1, -40)
