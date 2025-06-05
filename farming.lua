@@ -213,7 +213,6 @@ local function makeToggleButton(parent, label, y, loopFunc)
 		if running[label] then
 			task.spawn(function()
 				while running[label] do
-					print(label .. " running") -- debug
 					loopFunc()
 				end
 			end)
@@ -242,8 +241,8 @@ y = y2
 
 -- Start Auto Plant Seeds
 local autoPlantBtn, y2 = makeToggleButton(farmingScroll, "Auto Plant Seeds", y, function()
-	local id = "7bd389d1c6c941dfa53e26e2c3e0910f"
-	network:WaitForChild("FarmingHold_Start"):FireServer(id)
+	local args = {"7bd389d1c6c941dfa53e26e2c3e0910f"}
+	network:WaitForChild("FarmingHold_Start"):FireServer(unpack(args))
 	task.wait(2)
 end)
 y = y2
@@ -251,6 +250,44 @@ y = y2
 -- Start Roll Egg
 local rollEggBtn, y2 = makeToggleButton(farmingScroll, "Roll Egg", y, function()
 	network:WaitForChild("Eggs_Roll"):InvokeServer()
+	task.wait(2)
+end)
+y = y2
+
+-- Start FarmingMerchant (1-6)
+local farmMerchantBtn, y2 = makeToggleButton(farmingScroll, "FarmingMerchant (1-6)", y, function()
+	for i = 1, 6 do
+		local args = {"FarmingMerchant", i}
+		network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
+		task.wait(0.1)
+	end
+	task.wait(1)
+end)
+y = y2
+
+-- Start StandardMerchant (1-6)
+local stdMerchantBtn, y2 = makeToggleButton(farmingScroll, "StandardMerchant (1-6)", y, function()
+	for i = 1, 6 do
+		local args = {"StandardMerchant", i}
+		network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
+		task.wait(0.1)
+	end
+	task.wait(1)
+end)
+y = y2
+
+-- Start Potion Vending
+local potionBtn, y2 = makeToggleButton(farmingScroll, "Potion Vending", y, function()
+	local args = {"PotionVendingMachine"}
+	network:WaitForChild("VendingMachines_Purchase"):InvokeServer(unpack(args))
+	task.wait(2)
+end)
+y = y2
+
+-- Start Loot Chest Unlock (5)
+local lootChestBtn, y2 = makeToggleButton(farmingScroll, "Loot Chest Unlock (5)", y, function()
+	local args = {5, false}
+	network:WaitForChild("LootChest_Unlock"):InvokeServer(unpack(args))
 	task.wait(2)
 end)
 y = y2
@@ -319,13 +356,15 @@ y = newY
 local autoMineBtn, y2 = makeToggleButton(miningScroll, "Auto Mine", y, function()
 	if mineAllChecked then
 		for _, oreId in ipairs(oreOrder) do
-			network:WaitForChild("Mining_Attack"):InvokeServer(oreId)
+			local args = {oreId}
+			network:WaitForChild("Mining_Attack"):InvokeServer(unpack(args))
 			task.wait(0.2)
 		end
 	else
 		for _, oreId in ipairs(oreOrder) do
 			if oreCheckboxes[oreId]() then
-				network:WaitForChild("Mining_Attack"):InvokeServer(oreId)
+				local args = {oreId}
+				network:WaitForChild("Mining_Attack"):InvokeServer(unpack(args))
 				task.wait(0.2)
 			end
 		end
@@ -354,18 +393,14 @@ y3 = createSectionHeader(merchantsScroll, "Auto Merchants", y3)
 local function makeMerchantToggle(label, count, y, merchantName)
 	return makeToggleButton(merchantsScroll, label, y, function()
 		for i = 1, count do
-			network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(merchantName, i)
+			local args = {merchantName, i}
+			network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
 			task.wait(0.1)
 		end
 		task.wait(1)
 	end)
 end
 
-local potionBtn, y3b = makeToggleButton(merchantsScroll, "Potion Vending", y3, function()
-	network:WaitForChild("VendingMachines_Purchase"):InvokeServer("PotionVendingMachine")
-	task.wait(2)
-end)
-y3 = y3b
 local miningMerchantBtn, y3b = makeMerchantToggle("MiningMerchant (1-8)", 8, y3, "MiningMerchant")
 y3 = y3b
 local farmMerchantBtn, y3b = makeMerchantToggle("FarmingMerchant (1-6)", 6, y3, "FarmingMerchant")
