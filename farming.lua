@@ -27,6 +27,10 @@ local CHECKBOX_CHECKED = Color3.fromRGB(0,255,128)
 local CHECKBOX_UNCHECKED = Color3.fromRGB(40,40,40)
 local FONT = Enum.Font.SourceSans
 
+-- Update color scheme for readability
+local ACTIVE_BUTTON_COLOR = Color3.fromRGB(0, 170, 255)
+local ACTIVE_BUTTON_TEXT = Color3.fromRGB(255,255,255)
+
 -- Main Frame
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 320, 0, 320)
@@ -45,7 +49,96 @@ tabBar.BackgroundColor3 = BG_COLOR
 tabBar.BorderSizePixel = 0
 tabBar.Parent = mainFrame
 
-local tabs = {"Farming", "Mining", "Merchants"}
+-- Add Settings tab
+local tabs = {"Farming", "Mining", "Merchants", "Settings"}
+
+-- Draggable top bar
+local dragging, dragInput, dragStart, startPos
+local UIS = game:GetService("UserInputService")
+tabBar.Active = true
+tabBar.Draggable = false
+tabBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = mainFrame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+tabBar.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+-- Resizer (bottom right)
+local resizer = Instance.new("Frame")
+resizer.Size = UDim2.new(0, 16, 0, 16)
+resizer.Position = UDim2.new(1, -16, 1, -16)
+resizer.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+resizer.BorderSizePixel = 0
+resizer.Parent = mainFrame
+resizer.Active = true
+local resizing = false
+local resizeStart, frameStart
+resizer.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		resizing = true
+		resizeStart = input.Position
+		frameStart = mainFrame.Size
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				resizing = false
+			end
+		end)
+	end
+end)
+resizer.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		UIS.InputChanged:Connect(function(moveInput)
+			if resizing and moveInput == input then
+				local delta = moveInput.Position - resizeStart
+				mainFrame.Size = UDim2.new(0, math.max(220, frameStart.X.Offset + delta.X), 0, math.max(220, frameStart.Y.Offset + delta.Y))
+			end
+		end)
+	end
+end)
+
+-- Hide/Show GUI logic
+local showBtn = Instance.new("TextButton")
+showBtn.Size = UDim2.new(0, 60, 0, 28)
+showBtn.Position = UDim2.new(0, 0, 0.5, -14)
+showBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+showBtn.BorderColor3 = BORDER_COLOR
+showBtn.BorderSizePixel = 1
+showBtn.TextColor3 = BUTTON_TEXT
+showBtn.Font = FONT
+showBtn.TextSize = 13
+showBtn.Text = "Show GUI"
+showBtn.Visible = false
+showBtn.Parent = screenGui
+
+local function hideGUI()
+	mainFrame.Visible = false
+	showBtn.Visible = true
+end
+local function showGUI()
+	mainFrame.Visible = true
+	showBtn.Visible = false
+end
+showBtn.MouseButton1Click:Connect(showGUI)
+
+-- Tab switching function
 local tabFrames = {}
 local selectedTab = "Farming"
 local tabBtnX = 8
@@ -192,7 +285,8 @@ end
 -- Helper for toggle buttons
 local running = {}
 
-local function makeToggleButton(parent, label, y, loopFunc)
+-- Update makeToggleButton to use readable blue for active
+function makeToggleButton(parent, label, y, loopFunc)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(1, -20, 0, 24)
 	btn.Position = UDim2.new(0, 10, 0, y)
@@ -204,12 +298,12 @@ local function makeToggleButton(parent, label, y, loopFunc)
 	btn.TextSize = 13
 	btn.Text = "Start " .. label
 	btn.Parent = parent
-
 	running[label] = false
 	btn.MouseButton1Click:Connect(function()
 		running[label] = not running[label]
 		btn.Text = (running[label] and "Stop " or "Start ") .. label
-		btn.BackgroundColor3 = running[label] and CHECKBOX_CHECKED or BUTTON_BG
+		btn.BackgroundColor3 = running[label] and ACTIVE_BUTTON_COLOR or BUTTON_BG
+		btn.TextColor3 = running[label] and ACTIVE_BUTTON_TEXT or BUTTON_TEXT
 		if running[label] then
 			task.spawn(function()
 				while running[label] do
@@ -221,7 +315,7 @@ local function makeToggleButton(parent, label, y, loopFunc)
 	return btn, y + 28
 end
 
--- Farming Tab
+-- Farming Tab (no merchants)
 local farmingFrame = Instance.new("Frame")
 farmingFrame.Size = UDim2.new(1, 0, 1, -40)
 farmingFrame.Position = UDim2.new(0, 0, 0, 40)
@@ -254,36 +348,6 @@ local rollEggBtn, y2 = makeToggleButton(farmingScroll, "Roll Egg", y, function()
 end)
 y = y2
 
--- Start FarmingMerchant (1-6)
-local farmMerchantBtn, y2 = makeToggleButton(farmingScroll, "FarmingMerchant (1-6)", y, function()
-	for i = 1, 6 do
-		local args = {"FarmingMerchant", i}
-		network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
-		task.wait(0.1)
-	end
-	task.wait(1)
-end)
-y = y2
-
--- Start StandardMerchant (1-6)
-local stdMerchantBtn, y2 = makeToggleButton(farmingScroll, "StandardMerchant (1-6)", y, function()
-	for i = 1, 6 do
-		local args = {"StandardMerchant", i}
-		network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
-		task.wait(0.1)
-	end
-	task.wait(1)
-end)
-y = y2
-
--- Start Potion Vending
-local potionBtn, y2 = makeToggleButton(farmingScroll, "Potion Vending", y, function()
-	local args = {"PotionVendingMachine"}
-	network:WaitForChild("VendingMachines_Purchase"):InvokeServer(unpack(args))
-	task.wait(2)
-end)
-y = y2
-
 -- Start Loot Chest Unlock (5)
 local lootChestBtn, y2 = makeToggleButton(farmingScroll, "Loot Chest Unlock (5)", y, function()
 	local args = {5, false}
@@ -298,8 +362,19 @@ local spyBtn, y2 = createFlatButton(farmingScroll, "Remote Spy", y, BUTTON_BG, B
 end)
 y = y2
 
--- KILL SCRIPT
-local killBtn, y2 = createFlatButton(farmingScroll, "🛑 KILL SCRIPT", y, BUTTON_BG, BUTTON_BORDER, function()
+-- Settings Tab
+local settingsFrame = Instance.new("Frame")
+settingsFrame.Size = UDim2.new(1, 0, 1, -40)
+settingsFrame.Position = UDim2.new(0, 0, 0, 40)
+settingsFrame.BackgroundTransparency = 1
+settingsFrame.Parent = mainFrame
+tabFrames["Settings"] = settingsFrame
+local settingsScroll = createScrollableFrame(settingsFrame)
+local yS = 0
+yS = createSectionHeader(settingsScroll, "Settings", yS)
+local hideBtn, yS2 = createFlatButton(settingsScroll, "Hide UI", yS, BUTTON_BG, BUTTON_BORDER, hideGUI)
+yS = yS2
+local killBtn, yS2 = createFlatButton(settingsScroll, "🛑 KILL SCRIPT", yS, BUTTON_BG, BUTTON_BORDER, function()
 	for k in pairs(running) do running[k] = false end
 	screenGui:Destroy()
 end)
@@ -372,11 +447,6 @@ local autoMineBtn, y2 = makeToggleButton(miningScroll, "Auto Mine", y, function(
 	task.wait(0.5)
 end)
 y = y2
-
-local killBtn2, y2 = createFlatButton(miningScroll, "🛑 KILL SCRIPT", y, BUTTON_BG, BUTTON_BORDER, function()
-	for k in pairs(running) do running[k] = false end
-	screenGui:Destroy()
-end)
 
 -- Merchants Tab
 local merchantsFrame = Instance.new("Frame")
