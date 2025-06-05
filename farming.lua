@@ -9,186 +9,159 @@ screenGui.Name = "FarmingHubGUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Modernized GUI Styles
-local BUTTON_COLOR = Color3.fromRGB(40, 40, 40)
-local BUTTON_COLOR_ACTIVE = Color3.fromRGB(0, 170, 0)
-local BUTTON_COLOR_DANGER = Color3.fromRGB(200, 40, 40)
-local BUTTON_COLOR_SECONDARY = Color3.fromRGB(60, 60, 120)
-local BUTTON_TEXT_COLOR = Color3.fromRGB(255, 255, 255)
-local BUTTON_HOVER_COLOR = Color3.fromRGB(70, 70, 70)
-local FRAME_BG = Color3.fromRGB(25, 25, 25)
-local SECTION_HEADER_COLOR = Color3.fromRGB(50, 50, 50)
-local CORNER_RADIUS = UDim.new(0, 8)
+-- Flat, Neon Green Bordered GUI Styles
+local BORDER_COLOR = Color3.fromRGB(0,255,128)
+local BG_COLOR = Color3.fromRGB(20,20,20)
+local TAB_BG = Color3.fromRGB(30,30,30)
+local TAB_ACTIVE_BG = Color3.fromRGB(40,40,40)
+local TAB_TEXT = Color3.fromRGB(220,220,220)
+local SECTION_HEADER_BG = Color3.fromRGB(25,25,25)
+local SECTION_HEADER_TEXT = Color3.fromRGB(0,255,128)
+local BUTTON_BG = Color3.fromRGB(30,30,30)
+local BUTTON_BORDER = Color3.fromRGB(0,255,128)
+local BUTTON_TEXT = Color3.fromRGB(220,220,220)
+local BUTTON_HOVER_BG = Color3.fromRGB(40,40,40)
+local CHECKBOX_BG = Color3.fromRGB(30,30,30)
+local CHECKBOX_BORDER = Color3.fromRGB(0,255,128)
+local CHECKBOX_CHECKED = Color3.fromRGB(0,255,128)
+local CHECKBOX_UNCHECKED = Color3.fromRGB(40,40,40)
+local FONT = Enum.Font.SourceSans
 
--- Main Frame (Resizable)
+-- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 260, 0, 370)
+mainFrame.Size = UDim2.new(0, 420, 0, 420)
 mainFrame.Position = UDim2.new(0, 200, 0, 120)
-mainFrame.BackgroundColor3 = FRAME_BG
-mainFrame.BorderSizePixel = 0
+mainFrame.BackgroundColor3 = BG_COLOR
+mainFrame.BorderColor3 = BORDER_COLOR
+mainFrame.BorderSizePixel = 2
 mainFrame.Active = true
 mainFrame.Parent = screenGui
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = CORNER_RADIUS
-mainCorner.Parent = mainFrame
 
--- Resizer (bottom right)
-local resizer = Instance.new("Frame")
-resizer.Size = UDim2.new(0, 16, 0, 16)
-resizer.Position = UDim2.new(1, -16, 1, -16)
-resizer.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-resizer.BorderSizePixel = 0
-resizer.Parent = mainFrame
-local resizerCorner = Instance.new("UICorner")
-resizerCorner.CornerRadius = UDim.new(1, 0)
-resizerCorner.Parent = resizer
-resizer.Active = true
+-- Top Tab Bar
+local tabBar = Instance.new("Frame")
+tabBar.Size = UDim2.new(1, 0, 0, 36)
+tabBar.Position = UDim2.new(0, 0, 0, 0)
+tabBar.BackgroundColor3 = BG_COLOR
+tabBar.BorderSizePixel = 0
+tabBar.Parent = mainFrame
 
-local resizing = false
-local resizeStart, frameStart
-resizer.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		resizing = true
-		resizeStart = input.Position
-		frameStart = mainFrame.Size
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				resizing = false
-			end
-		end)
-	end
-end)
-resizer.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		local UIS = game:GetService("UserInputService")
-		UIS.InputChanged:Connect(function(moveInput)
-			if resizing and moveInput == input then
-				local delta = moveInput.Position - resizeStart
-				mainFrame.Size = UDim2.new(0, math.max(220, frameStart.X.Offset + delta.X), 0, math.max(220, frameStart.Y.Offset + delta.Y))
-			end
-		end)
-	end
-end)
-
--- Top Bar (Draggable)
-local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0, 32)
-topBar.Position = UDim2.new(0, 0, 0, 0)
-topBar.BackgroundColor3 = SECTION_HEADER_COLOR
-topBar.BorderSizePixel = 0
-topBar.Parent = mainFrame
-local topBarCorner = Instance.new("UICorner")
-topBarCorner.CornerRadius = CORNER_RADIUS
-topBarCorner.Parent = topBar
-
-topBar.Active = true
-topBar.Draggable = false
-local dragging, dragInput, dragStart, startPos
-local UIS = game:GetService("UserInputService")
-topBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = mainFrame.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-topBar.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput = input
-	end
-end)
-UIS.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		local delta = input.Position - dragStart
-		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-end)
-
--- Tab Bar
 local tabs = {"Farming", "Mining", "Merchants"}
 local tabFrames = {}
 local selectedTab = "Farming"
-local tabBar = Instance.new("Frame")
-tabBar.Size = UDim2.new(1, 0, 0, 32)
-tabBar.Position = UDim2.new(0, 0, 0, 0)
-tabBar.BackgroundTransparency = 1
-tabBar.Parent = topBar
-
 local tabBtnX = 8
+local tabBtnW = 110
 for i, tabName in ipairs(tabs) do
 	local tabBtn = Instance.new("TextButton")
-	tabBtn.Size = UDim2.new(0, 80, 0, 28)
-	tabBtn.Position = UDim2.new(0, tabBtnX, 0, 2)
-	tabBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	tabBtn.TextColor3 = BUTTON_TEXT_COLOR
-	tabBtn.Font = Enum.Font.SourceSansBold
-	tabBtn.TextSize = 15
+	tabBtn.Size = UDim2.new(0, tabBtnW, 0, 28)
+	tabBtn.Position = UDim2.new(0, tabBtnX, 0, 4)
+	tabBtn.BackgroundColor3 = (tabName == selectedTab) and TAB_ACTIVE_BG or TAB_BG
+	tabBtn.BorderColor3 = BORDER_COLOR
+	tabBtn.BorderSizePixel = 1
+	tabBtn.TextColor3 = TAB_TEXT
+	tabBtn.Font = FONT
+	tabBtn.TextSize = 20
 	tabBtn.Text = tabName
 	tabBtn.Parent = tabBar
-	local tabBtnCorner = Instance.new("UICorner")
-	tabBtnCorner.CornerRadius = CORNER_RADIUS
-	tabBtnCorner.Parent = tabBtn
-	tabBtn.MouseEnter:Connect(function()
-		tabBtn.BackgroundColor3 = BUTTON_HOVER_COLOR
-	end)
-	tabBtn.MouseLeave:Connect(function()
-		tabBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	end)
 	tabBtn.MouseButton1Click:Connect(function()
 		selectedTab = tabName
 		for name, frame in pairs(tabFrames) do
 			frame.Visible = (name == tabName)
 		end
+		for _, btn in ipairs(tabBar:GetChildren()) do
+			if btn:IsA("TextButton") then
+				btn.BackgroundColor3 = (btn.Text == selectedTab) and TAB_ACTIVE_BG or TAB_BG
+			end
+		end
 	end)
-	tabBtnX = tabBtnX + 88
+	tabBtnX = tabBtnX + tabBtnW + 4
 end
 
 -- Section Header Helper
 local function createSectionHeader(parent, text, y)
 	local header = Instance.new("TextLabel")
-	header.Size = UDim2.new(1, -16, 0, 22)
-	header.Position = UDim2.new(0, 8, 0, y)
-	header.BackgroundColor3 = SECTION_HEADER_COLOR
-	header.TextColor3 = BUTTON_TEXT_COLOR
-	header.Font = Enum.Font.SourceSansBold
-	header.TextSize = 14
+	header.Size = UDim2.new(1, -24, 0, 28)
+	header.Position = UDim2.new(0, 12, 0, y)
+	header.BackgroundColor3 = SECTION_HEADER_BG
+	header.BorderColor3 = BORDER_COLOR
+	header.BorderSizePixel = 1
+	header.TextColor3 = SECTION_HEADER_TEXT
+	header.Font = FONT
+	header.TextSize = 18
 	header.Text = text
 	header.TextXAlignment = Enum.TextXAlignment.Left
-	header.BackgroundTransparency = 0.1
 	header.Parent = parent
-	local headerCorner = Instance.new("UICorner")
-	headerCorner.CornerRadius = CORNER_RADIUS
-	headerCorner.Parent = header
-	return y + 28
+	return y + 36
 end
 
--- Button Helper
-local function createModernButton(parent, text, y, color, colorActive, callback)
+-- Flat Button Helper
+local function createFlatButton(parent, text, y, color, borderColor, callback)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, -32, 0, 32)
-	btn.Position = UDim2.new(0, 16, 0, y)
-	btn.BackgroundColor3 = color or BUTTON_COLOR
-	btn.TextColor3 = BUTTON_TEXT_COLOR
-	btn.Font = Enum.Font.SourceSansBold
-	btn.TextSize = 15
+	btn.Size = UDim2.new(1, -24, 0, 32)
+	btn.Position = UDim2.new(0, 12, 0, y)
+	btn.BackgroundColor3 = color or BUTTON_BG
+	btn.BorderColor3 = borderColor or BUTTON_BORDER
+	btn.BorderSizePixel = 1
+	btn.TextColor3 = BUTTON_TEXT
+	btn.Font = FONT
+	btn.TextSize = 16
 	btn.Text = text
 	btn.Parent = parent
-	local btnCorner = Instance.new("UICorner")
-	btnCorner.CornerRadius = CORNER_RADIUS
-	btnCorner.Parent = btn
 	btn.MouseEnter:Connect(function()
-		btn.BackgroundColor3 = BUTTON_HOVER_COLOR
+		btn.BackgroundColor3 = BUTTON_HOVER_BG
 	end)
 	btn.MouseLeave:Connect(function()
-		btn.BackgroundColor3 = color or BUTTON_COLOR
+		btn.BackgroundColor3 = color or BUTTON_BG
 	end)
 	btn.MouseButton1Click:Connect(callback)
 	return btn, y + 40
+end
+
+-- Flat Checkbox Helper
+local function createFlatCheckbox(parent, text, y, checkedCallback)
+	local cbFrame = Instance.new("Frame")
+	cbFrame.Size = UDim2.new(1, -24, 0, 28)
+	cbFrame.Position = UDim2.new(0, 12, 0, y)
+	cbFrame.BackgroundTransparency = 1
+	cbFrame.Parent = parent
+	local cb = Instance.new("TextButton")
+	cb.Size = UDim2.new(0, 22, 0, 22)
+	cb.Position = UDim2.new(0, 0, 0, 3)
+	cb.BackgroundColor3 = CHECKBOX_UNCHECKED
+	cb.BorderColor3 = CHECKBOX_BORDER
+	cb.BorderSizePixel = 1
+	cb.TextColor3 = CHECKBOX_CHECKED
+	cb.Font = FONT
+	cb.TextSize = 18
+	cb.Text = ""
+	cb.Parent = cbFrame
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -28, 1, 0)
+	label.Position = UDim2.new(0, 28, 0, 0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = BUTTON_TEXT
+	label.Font = FONT
+	label.TextSize = 16
+	label.Text = text
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = cbFrame
+	local checked = false
+	cb.MouseButton1Click:Connect(function()
+		checked = not checked
+		cb.Text = checked and "■" or ""
+		cb.BackgroundColor3 = checked and CHECKBOX_CHECKED or CHECKBOX_UNCHECKED
+		checkedCallback(checked)
+	end)
+	cb.MouseEnter:Connect(function()
+		cb.BackgroundColor3 = checked and CHECKBOX_CHECKED or BUTTON_HOVER_BG
+	end)
+	cb.MouseLeave:Connect(function()
+		cb.BackgroundColor3 = checked and CHECKBOX_CHECKED or CHECKBOX_UNCHECKED
+	end)
+	return cb, y + 32, function() return checked end, function(val)
+		checked = val
+		cb.Text = checked and "■" or ""
+		cb.BackgroundColor3 = checked and CHECKBOX_CHECKED or CHECKBOX_UNCHECKED
+	end
 end
 
 -- Scrollable Content Helper
@@ -198,7 +171,7 @@ local function createScrollableFrame(parent)
 	scroll.Position = UDim2.new(0, 0, 0, 40)
 	scroll.BackgroundTransparency = 1
 	scroll.BorderSizePixel = 0
-	scroll.CanvasSize = UDim2.new(0, 0, 0, 600)
+	scroll.CanvasSize = UDim2.new(0, 0, 0, 800)
 	scroll.ScrollBarThickness = 6
 	scroll.Parent = parent
 	return scroll
@@ -252,11 +225,11 @@ y = createSectionHeader(farmingScroll, "Auto Actions", y)
 
 -- Start Auto Farm
 local autoFarmState = {debounce = false, running = false}
-local autoFarmBtn, y2 = createModernButton(farmingScroll, "Start Auto Farm", y, BUTTON_COLOR, BUTTON_COLOR_ACTIVE, function()
+local autoFarmBtn, y2 = createFlatButton(farmingScroll, "Start Auto Farm", y, BUTTON_BG, BUTTON_BORDER, function()
 	if not debounceToggle(autoFarmState, "debounce") then return end
 	autoFarmState.running = not autoFarmState.running
 	autoFarmBtn.Text = autoFarmState.running and "Stop Auto Farm" or "Start Auto Farm"
-	autoFarmBtn.BackgroundColor3 = autoFarmState.running and BUTTON_COLOR_ACTIVE or BUTTON_COLOR
+	autoFarmBtn.BackgroundColor3 = autoFarmState.running and BUTTON_BG or BUTTON_BG
 	if autoFarmState.running then
 		startLoop("AutoFarm", function()
 			network:WaitForChild("Farming_AutoFarm"):FireServer()
@@ -270,11 +243,11 @@ y = y2
 
 -- Start Auto Plant Seeds
 local autoPlantState = {debounce = false, running = false}
-local autoPlantBtn, y2 = createModernButton(farmingScroll, "Start Auto Plant Seeds", y, BUTTON_COLOR, BUTTON_COLOR_ACTIVE, function()
+local autoPlantBtn, y2 = createFlatButton(farmingScroll, "Start Auto Plant Seeds", y, BUTTON_BG, BUTTON_BORDER, function()
 	if not debounceToggle(autoPlantState, "debounce") then return end
 	autoPlantState.running = not autoPlantState.running
 	autoPlantBtn.Text = autoPlantState.running and "Stop Auto Plant Seeds" or "Start Auto Plant Seeds"
-	autoPlantBtn.BackgroundColor3 = autoPlantState.running and BUTTON_COLOR_ACTIVE or BUTTON_COLOR
+	autoPlantBtn.BackgroundColor3 = autoPlantState.running and BUTTON_BG or BUTTON_BG
 	if autoPlantState.running then
 		startLoop("AutoPlant", function()
 			local id = "7bd389d1c6c941dfa53e26e2c3e0910f"
@@ -289,11 +262,11 @@ y = y2
 
 -- Start Roll Egg
 local rollEggState = {debounce = false, running = false}
-local rollEggBtn, y2 = createModernButton(farmingScroll, "Start Roll Egg", y, BUTTON_COLOR, BUTTON_COLOR_ACTIVE, function()
+local rollEggBtn, y2 = createFlatButton(farmingScroll, "Start Roll Egg", y, BUTTON_BG, BUTTON_BORDER, function()
 	if not debounceToggle(rollEggState, "debounce") then return end
 	rollEggState.running = not rollEggState.running
 	rollEggBtn.Text = rollEggState.running and "Stop Roll Egg" or "Start Roll Egg"
-	rollEggBtn.BackgroundColor3 = rollEggState.running and BUTTON_COLOR_ACTIVE or BUTTON_COLOR
+	rollEggBtn.BackgroundColor3 = rollEggState.running and BUTTON_BG or BUTTON_BG
 	if rollEggState.running then
 		startLoop("RollEgg", function()
 			network:WaitForChild("Eggs_Roll"):InvokeServer()
@@ -306,41 +279,27 @@ end)
 y = y2
 
 -- Remote Spy
-local spyBtn, y2 = createModernButton(farmingScroll, "Remote Spy", y, BUTTON_COLOR_SECONDARY, BUTTON_COLOR_ACTIVE, function()
+local spyBtn, y2 = createFlatButton(farmingScroll, "Remote Spy", y, BUTTON_BG, BUTTON_BORDER, function()
 	loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpyBeta.lua"))()
 end)
 y = y2
 
 -- KILL SCRIPT
-local killBtn, y2 = createModernButton(farmingScroll, "🛑 KILL SCRIPT", y, BUTTON_COLOR_DANGER, BUTTON_COLOR_DANGER, function()
+local killBtn, y2 = createFlatButton(farmingScroll, "🛑 KILL SCRIPT", y, BUTTON_BG, BUTTON_BORDER, function()
 	killScript()
 end)
 
 -- Mining Tab
 local miningFrame = Instance.new("Frame")
-miningFrame.Size = UDim2.new(1, -8, 1, -36)
-miningFrame.Position = UDim2.new(0, 4, 0, 32)
+miningFrame.Size = UDim2.new(1, 0, 1, -40)
+miningFrame.Position = UDim2.new(0, 0, 0, 40)
 miningFrame.BackgroundTransparency = 1
 miningFrame.Parent = mainFrame
 miningFrame.Visible = false
 tabFrames["Mining"] = miningFrame
-
-local miningHeader = Instance.new("Frame")
-miningHeader.Size = UDim2.new(1, 0, 0, 22)
-miningHeader.Position = UDim2.new(0, 0, 0, 0)
-miningHeader.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-miningHeader.Parent = miningFrame
-
-local miningLabel = Instance.new("TextLabel")
-miningLabel.Size = UDim2.new(1, -28, 1, 0)
-miningLabel.Position = UDim2.new(0, 4, 0, 0)
-miningLabel.BackgroundTransparency = 1
-miningLabel.TextColor3 = Color3.fromRGB(255,255,255)
-miningLabel.Font = Enum.Font.SourceSansBold
-miningLabel.TextSize = 13
-miningLabel.Text = "Mining"
-miningLabel.TextXAlignment = Enum.TextXAlignment.Left
-miningLabel.Parent = miningHeader
+local miningScroll = createScrollableFrame(miningFrame)
+local yM = 0
+yM = createSectionHeader(miningScroll, "Mining Ores", yM)
 
 local oreNames = {
 	[6] = "Dirt",
@@ -354,122 +313,64 @@ local oreNames = {
 }
 local oreOrder = {6,5,3,2,1,4,9,7}
 local oreCheckboxes = {}
-local mineAllBox
-
-local y2 = 2
-for _, oreId in ipairs(oreOrder) do
-	local cb = Instance.new("TextButton")
-	cb.Size = UDim2.new(0, 16, 0, 16)
-	cb.Position = UDim2.new(0, 10, 0, y2)
-	cb.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-	cb.BorderSizePixel = 1
-	cb.BorderColor3 = Color3.fromRGB(180, 180, 180)
-	cb.TextColor3 = Color3.fromRGB(40,40,40)
-	cb.Font = Enum.Font.SourceSansBold
-	cb.TextSize = 13
-	cb.Text = ""
-	cb.Parent = miningFrame
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(0, 60, 0, 16)
-	label.Position = UDim2.new(0, 30, 0, y2)
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.fromRGB(255,255,255)
-	label.Font = Enum.Font.SourceSans
-	label.TextSize = 11
-	label.Text = oreNames[oreId]
-	label.Parent = miningFrame
-	local checked = false
-	cb.MouseButton1Click:Connect(function()
-		checked = not checked
-		cb.Text = checked and "✔" or ""
-		cb.TextColor3 = checked and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(40,40,40)
-	end)
-	oreCheckboxes[oreId] = function() return checked end
-	y2 = y2 + 18
-end
-
-mineAllBox = Instance.new("TextButton")
-mineAllBox.Size = UDim2.new(0, 16, 0, 16)
-mineAllBox.Position = UDim2.new(0, 10, 0, y2)
-mineAllBox.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-mineAllBox.BorderSizePixel = 1
-mineAllBox.BorderColor3 = Color3.fromRGB(180, 180, 180)
-mineAllBox.TextColor3 = Color3.fromRGB(40,40,40)
-mineAllBox.Font = Enum.Font.SourceSansBold
-mineAllBox.TextSize = 13
-mineAllBox.Text = ""
-mineAllBox.Parent = miningFrame
-local mineAllLabel = Instance.new("TextLabel")
-mineAllLabel.Size = UDim2.new(0, 60, 0, 16)
-mineAllLabel.Position = UDim2.new(0, 30, 0, y2)
-mineAllLabel.BackgroundTransparency = 1
-mineAllLabel.TextColor3 = Color3.fromRGB(255,255,255)
-mineAllLabel.Font = Enum.Font.SourceSans
-mineAllLabel.TextSize = 11
-mineAllLabel.Text = "Mine All"
-mineAllLabel.Parent = miningFrame
 local mineAllChecked = false
+local checkboxes = {}
+
+local y = yM
+for _, oreId in ipairs(oreOrder) do
+	local cb, newY, getChecked, setChecked = createFlatCheckbox(miningScroll, oreNames[oreId], y, function(val) end)
+	oreCheckboxes[oreId] = getChecked
+	checkboxes[oreId] = setChecked
+	y = newY
+end
+local cb, newY, getChecked, setChecked = createFlatCheckbox(miningScroll, "Mine All", y, function(val)
+	mineAllChecked = val
+	for _, setFn in pairs(checkboxes) do
+		setFn(val)
+	end
+end)
+local mineAllBox = cb
 mineAllBox.MouseButton1Click:Connect(function()
 	mineAllChecked = not mineAllChecked
-	mineAllBox.Text = mineAllChecked and "✔" or ""
-	mineAllBox.TextColor3 = mineAllChecked and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(40,40,40)
+	for _, setFn in pairs(checkboxes) do
+		setFn(mineAllChecked)
+	end
 end)
-y2 = y2 + 20
+y = newY
 
-local autoMineBtn = Instance.new("TextButton")
-autoMineBtn.Size = UDim2.new(0, 90, 0, 18)
-autoMineBtn.Position = UDim2.new(0, 10, 0, y2)
-autoMineBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-autoMineBtn.TextColor3 = Color3.fromRGB(255,255,255)
-autoMineBtn.Font = Enum.Font.SourceSansBold
-autoMineBtn.TextSize = 11
-autoMineBtn.Text = "Auto Mine: OFF"
-autoMineBtn.Parent = miningFrame
-local miningActive = false
-autoMineBtn.MouseButton1Click:Connect(function()
-	miningActive = not miningActive
-	autoMineBtn.Text = miningActive and "Auto Mine: ON" or "Auto Mine: OFF"
-	if miningActive then
-		task.spawn(function()
-			while miningActive and not killed do
-				if mineAllChecked then
-					for _, oreId in ipairs(oreOrder) do
+-- Auto Mine Button
+local autoMineState = {debounce = false, running = false}
+local autoMineBtn, y2 = createFlatButton(miningScroll, "Auto Mine: OFF", y, BUTTON_BG, BUTTON_BORDER, function()
+	if not debounceToggle(autoMineState, "debounce") then return end
+	autoMineState.running = not autoMineState.running
+	autoMineBtn.Text = autoMineState.running and "Auto Mine: ON" or "Auto Mine: OFF"
+	autoMineBtn.BackgroundColor3 = autoMineState.running and BUTTON_BG or BUTTON_BG
+	if autoMineState.running then
+		startLoop("AutoMine", function()
+			if mineAllChecked then
+				for _, oreId in ipairs(oreOrder) do
+					network:WaitForChild("Mining_Attack"):InvokeServer(oreId)
+					task.wait(0.2)
+				end
+			else
+				for _, oreId in ipairs(oreOrder) do
+					if oreCheckboxes[oreId]() then
 						network:WaitForChild("Mining_Attack"):InvokeServer(oreId)
 						task.wait(0.2)
 					end
-				else
-					for _, oreId in ipairs(oreOrder) do
-						if oreCheckboxes[oreId]() then
-							network:WaitForChild("Mining_Attack"):InvokeServer(oreId)
-							task.wait(0.2)
-						end
-					end
 				end
-				task.wait(0.5)
 			end
+			task.wait(0.5)
 		end)
+	else
+		stopLoop("AutoMine")
 	end
 end)
+y = y2
 
-y2 = y2 + 24
-local killButton2 = Instance.new("TextButton")
-killButton2.Size = UDim2.new(0, 90, 0, 18)
-killButton2.Position = UDim2.new(0, 10, 0, y2)
-killButton2.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-killButton2.TextColor3 = Color3.fromRGB(255, 255, 255)
-killButton2.Font = Enum.Font.SourceSansBold
-killButton2.TextSize = 11
-killButton2.Text = "🛑 KILL SCRIPT"
-killButton2.Parent = miningFrame
-killButton2.MouseButton1Click:Connect(function()
-	killed = true
-	for key in pairs(toggles) do
-		toggles[key] = function() return false end
-	end
-	screenGui:Destroy()
-	if screenGui:FindFirstChild("RestoreButton") then
-		screenGui.RestoreButton:Destroy()
-	end
+-- KILL SCRIPT
+local killBtn2, y2 = createFlatButton(miningScroll, "🛑 KILL SCRIPT", y, BUTTON_BG, BUTTON_BORDER, function()
+	killScript()
 end)
 
 -- Merchants Tab
