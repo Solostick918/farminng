@@ -190,23 +190,36 @@ local function switchTab(tabName)
 end
 
 -- Helper for toggle buttons
+local running = {}
+
 local function makeToggleButton(parent, label, y, loopFunc)
-	local state = {running = false}
-	local btn, nextY = createFlatButton(parent, "Start " .. label, y, BUTTON_BG, BUTTON_BORDER, function()
-		state.running = not state.running
-		btn.Text = (state.running and "Stop " or "Start ") .. label
-		btn.BackgroundColor3 = state.running and CHECKBOX_CHECKED or BUTTON_BG
-		if state.running then
-			state.thread = task.spawn(function()
-				while state.running do
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, -20, 0, 24)
+	btn.Position = UDim2.new(0, 10, 0, y)
+	btn.BackgroundColor3 = BUTTON_BG
+	btn.BorderColor3 = BUTTON_BORDER
+	btn.BorderSizePixel = 1
+	btn.TextColor3 = BUTTON_TEXT
+	btn.Font = FONT
+	btn.TextSize = 13
+	btn.Text = "Start " .. label
+	btn.Parent = parent
+
+	running[label] = false
+	btn.MouseButton1Click:Connect(function()
+		running[label] = not running[label]
+		btn.Text = (running[label] and "Stop " or "Start ") .. label
+		btn.BackgroundColor3 = running[label] and CHECKBOX_CHECKED or BUTTON_BG
+		if running[label] then
+			task.spawn(function()
+				while running[label] do
+					print(label .. " running") -- debug
 					loopFunc()
 				end
 			end)
-		else
-			if state.thread then task.cancel(state.thread) end
 		end
 	end)
-	return btn, nextY
+	return btn, y + 28
 end
 
 -- Farming Tab
@@ -250,6 +263,7 @@ y = y2
 
 -- KILL SCRIPT
 local killBtn, y2 = createFlatButton(farmingScroll, "🛑 KILL SCRIPT", y, BUTTON_BG, BUTTON_BORDER, function()
+	for k in pairs(running) do running[k] = false end
 	screenGui:Destroy()
 end)
 
@@ -321,6 +335,7 @@ end)
 y = y2
 
 local killBtn2, y2 = createFlatButton(miningScroll, "🛑 KILL SCRIPT", y, BUTTON_BG, BUTTON_BORDER, function()
+	for k in pairs(running) do running[k] = false end
 	screenGui:Destroy()
 end)
 
@@ -363,6 +378,7 @@ local iceFishingMerchantBtn, y3b = makeMerchantToggle("IceFishingMerchant (1-6)"
 y3 = y3b
 
 local killBtn3, y3b = createFlatButton(merchantsScroll, "🛑 KILL SCRIPT", y3, BUTTON_BG, BUTTON_BORDER, function()
+	for k in pairs(running) do running[k] = false end
 	screenGui:Destroy()
 end)
 
