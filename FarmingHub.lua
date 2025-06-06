@@ -153,7 +153,7 @@ local auraEggButton = createToggleButton("Start Aura Egg Merchant", y, function(
                         "AuraEggMerchant",
                         i
                     }
-                    network:WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
+                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
                     task.wait(0.1)
                 end
                 task.wait(1)
@@ -169,7 +169,7 @@ local autoFarmButton = createToggleButton("Start Auto Farm", y, function(isRunni
     if isRunning then
         task.spawn(function()
             while autoFarmButton.Text:find("Stop") do
-                network:WaitForChild("Farming_AutoFarm"):FireServer()
+                game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Farming_AutoFarm"):FireServer()
                 task.wait(2)
             end
         end)
@@ -182,7 +182,7 @@ local autoPlantButton = createToggleButton("Start Auto Plant", y, function(isRun
         task.spawn(function()
             while autoPlantButton.Text:find("Stop") do
                 local args = {"7bd389d1c6c941dfa53e26e2c3e0910f"}
-                network:WaitForChild("FarmingHold_Start"):FireServer(unpack(args))
+                game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("FarmingHold_Start"):FireServer(unpack(args))
                 task.wait(2)
             end
         end)
