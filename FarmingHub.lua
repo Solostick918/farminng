@@ -365,9 +365,46 @@ local killBtn, yS2 = createFlatButton(settingsScroll, "🛑 KILL SCRIPT", yS, BU
 	for k in pairs(running) do running[k] = false end
 	screenGui:Destroy()
 end)
+yS = yS2
+
+-- Reload Script Button
+local function reloadScript()
+	for k in pairs(running) do running[k] = false end
+	screenGui:Destroy()
+	local url = "https://raw.githubusercontent.com/Solostick918/farminng/refs/heads/Solostick918-patch-1/FarmingHub.lua"
+	local success, result = pcall(function()
+		loadstring(game:HttpGet(url))()
+	end)
+	if not success then
+		warn("Failed to reload script:", result)
+	end
+end
+local reloadBtn, yS3 = createFlatButton(settingsScroll, "🔄 Reload Script", yS, BUTTON_BG, BUTTON_BORDER, reloadScript)
+yS = yS3
 
 -- Game Optimizations Section
 local yOpt = createSectionHeader(settingsScroll, "Game Optimizations", yS)
+
+-- Enable All Optimizations Button
+local function enableAllOptimizations()
+	if not particlesDisabled then setParticlesDisabled(true) particleBtn.Text = "Enable Particle Effects" end
+	if not effectsDisabled then setEffectsDisabled(true) effectsBtn.Text = "Enable Post-Processing Effects" end
+	if not animsDisabled then setAnimsDisabled(true) animBtn.Text = "Enable Local Animations" end
+	if not petsHidden then setPetsHidden(true) petsBtn.Text = "Show Other Players' Pets" end
+	if not accessoriesHidden then setAccessoriesHidden(true) accBtn.Text = "Show Accessories" end
+	if not decorHidden then setDecorHidden(true) decorBtn.Text = "Show Decorative Objects" end
+	if not soundsMuted then setSoundsMuted(true) soundBtn.Text = "Unmute Sounds" end
+	if not uiAnimDisabled then setUIAnimDisabled(true) uiAnimBtn.Text = "Enable UI Animations" end
+	if not renderLow then setRenderLow(true) renderBtn.Text = "Restore Render Distance" end
+	if not decalsDisabled then setDecalsDisabled(true) decalBtn.Text = "Enable Decals" end
+	if not lightingLow then setLightingLow(true) lightingBtn.Text = "Restore Lighting Quality" end
+	if not unusedGuiRemoved then setUnusedGuiRemoved(true) unusedGuiBtn.Text = "Restore Unused GUI" end
+	if not unusedScriptsRemoved then setUnusedScriptsRemoved(true) unusedScriptsBtn.Text = "Restore Unused Scripts" end
+	if not unusedModelsRemoved then setUnusedModelsRemoved(true) unusedModelsBtn.Text = "Restore Unused Models" end
+	if not unusedGuisRemoved then setUnusedGuisRemoved(true) unusedGuisBtn.Text = "Restore Unused Guis" end
+	if not unusedMeshesRemoved then setUnusedMeshesRemoved(true) unusedMeshesBtn.Text = "Restore Unused Meshes" end
+end
+local allBtn, yOptAll = createFlatButton(settingsScroll, "Enable All Optimizations", yOpt, BUTTON_BG, BUTTON_BORDER, enableAllOptimizations)
 
 -- 1. Disable Particle Effects
 local particlesDisabled = false
@@ -538,6 +575,81 @@ end
 local lightingBtn, yOpt12 = createFlatButton(settingsScroll, "Force Low-Quality Lighting", yOpt11, BUTTON_BG, BUTTON_BORDER, function()
 	setLightingLow(not lightingLow)
 	lightingBtn.Text = (lightingLow and "Restore Lighting Quality") or "Force Low-Quality Lighting"
+end)
+
+-- 12. Remove Unused GUI Elements
+local unusedGuiRemoved = false
+local function setUnusedGuiRemoved(val)
+	unusedGuiRemoved = val
+	for _, obj in ipairs(screenGui:GetDescendants()) do
+		if (obj:IsA("Frame") or obj:IsA("TextButton") or obj:IsA("TextLabel")) and not obj.Visible then
+			obj.Parent = val and nil or screenGui
+		end
+	end
+end
+local unusedGuiBtn, yOpt13 = createFlatButton(settingsScroll, "Remove Unused GUI Elements", yOpt12, BUTTON_BG, BUTTON_BORDER, function()
+	setUnusedGuiRemoved(not unusedGuiRemoved)
+	unusedGuiBtn.Text = (unusedGuiRemoved and "Restore Unused GUI") or "Remove Unused GUI Elements"
+end)
+
+-- 13. Remove Unused Scripts in StarterGui
+local unusedScriptsRemoved = false
+local function setUnusedScriptsRemoved(val)
+	unusedScriptsRemoved = val
+	for _, obj in ipairs(player.PlayerGui:GetDescendants()) do
+		if obj:IsA("LocalScript") and not obj.Enabled then
+			obj.Parent = val and nil or player.PlayerGui
+		end
+	end
+end
+local unusedScriptsBtn, yOpt14 = createFlatButton(settingsScroll, "Remove Unused Scripts", yOpt13, BUTTON_BG, BUTTON_BORDER, function()
+	setUnusedScriptsRemoved(not unusedScriptsRemoved)
+	unusedScriptsBtn.Text = (unusedScriptsRemoved and "Restore Unused Scripts") or "Remove Unused Scripts"
+end)
+
+-- 14. Remove Unused Models in Workspace
+local unusedModelsRemoved = false
+local function setUnusedModelsRemoved(val)
+	unusedModelsRemoved = val
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Model") and not obj:FindFirstChild("Pet") and not obj:FindFirstChild("Humanoid") and not obj:FindFirstChild("Map") then
+			obj.Parent = val and nil or workspace
+		end
+	end
+end
+local unusedModelsBtn, yOpt15 = createFlatButton(settingsScroll, "Remove Unused Models", yOpt14, BUTTON_BG, BUTTON_BORDER, function()
+	setUnusedModelsRemoved(not unusedModelsRemoved)
+	unusedModelsBtn.Text = (unusedModelsRemoved and "Restore Unused Models") or "Remove Unused Models"
+end)
+
+-- 15. Remove Unused BillboardGuis/SurfaceGuis
+local unusedGuisRemoved = false
+local function setUnusedGuisRemoved(val)
+	unusedGuisRemoved = val
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if (obj:IsA("BillboardGui") or obj:IsA("SurfaceGui")) and not obj.Enabled then
+			obj.Parent = val and nil or workspace
+		end
+	end
+end
+local unusedGuisBtn, yOpt16 = createFlatButton(settingsScroll, "Remove Unused Billboard/SurfaceGuis", yOpt15, BUTTON_BG, BUTTON_BORDER, function()
+	setUnusedGuisRemoved(not unusedGuisRemoved)
+	unusedGuisBtn.Text = (unusedGuisRemoved and "Restore Unused Guis") or "Remove Unused Billboard/SurfaceGuis"
+end)
+
+-- 16. Remove Unused Meshes
+local unusedMeshesRemoved = false
+local function setUnusedMeshesRemoved(val)
+	unusedMeshesRemoved = val
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("MeshPart") and obj.Transparency == 1 then
+			obj.Parent = val and nil or workspace
+		end
+	end
+end
+local unusedMeshesBtn, yOpt17 = createFlatButton(settingsScroll, "Remove Unused Meshes", yOpt16, BUTTON_BG, BUTTON_BORDER, function()
+	setUnusedMeshesRemoved(not unusedMeshesRemoved)
+	unusedMeshesBtn.Text = (unusedMeshesRemoved and "Restore Unused Meshes") or "Remove Unused Meshes"
 end)
 
 -- Mining Tab
