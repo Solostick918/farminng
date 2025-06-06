@@ -176,9 +176,9 @@ local auraEggButton = createToggleButton("Start Aura Egg Merchant", y, function(
                         i
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
-                    task.wait(0.5)
+                    task.wait(0.1)
                 end
-                task.wait(2)
+                task.wait(0.5)
             end
         end)
     end
