@@ -131,11 +131,33 @@ end
 
 -- Toggle Button Function
 local function createToggleButton(text, y, callback)
-    local button = createButton(text, y, COLORS.SECONDARY, function()
-        button.Text = button.Text:gsub("Start", "Stop"):gsub("Stop", "Start")
-        button.BackgroundColor3 = button.Text:find("Stop") and COLORS.SUCCESS or COLORS.SECONDARY
-        callback(button.Text:find("Stop"))
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, -20, 0, 40)
+    button.Position = UDim2.new(0, 10, 0, y)
+    button.BackgroundColor3 = COLORS.SECONDARY
+    button.BorderSizePixel = 0
+    button.Text = text
+    button.TextColor3 = COLORS.TEXT
+    button.Font = Enum.Font.GothamSemibold
+    button.TextSize = 14
+    button.Parent = contentFrame
+    
+    -- Hover effect
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = COLORS.SECONDARY:Lerp(Color3.new(1, 1, 1), 0.1)
     end)
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = COLORS.SECONDARY
+    end)
+    
+    local isRunning = false
+    button.MouseButton1Click:Connect(function()
+        isRunning = not isRunning
+        button.Text = isRunning and text:gsub("Start", "Stop") or text
+        button.BackgroundColor3 = isRunning and COLORS.SUCCESS or COLORS.SECONDARY
+        callback(isRunning)
+    end)
+    
     return button
 end
 
@@ -147,16 +169,16 @@ y = createSectionHeader("Aura Egg Merchant", y)
 local auraEggButton = createToggleButton("Start Aura Egg Merchant", y, function(isRunning)
     if isRunning then
         task.spawn(function()
-            while auraEggButton.Text:find("Stop") do
+            while isRunning do
                 for i = 1, 6 do
                     local args = {
                         "AuraEggMerchant",
                         i
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
-                    task.wait(0.5) -- Increased wait time between purchases
+                    task.wait(0.5)
                 end
-                task.wait(2) -- Increased wait time between cycles
+                task.wait(2)
             end
         end)
     end
@@ -168,7 +190,7 @@ y = createSectionHeader("Farming", y)
 local autoFarmButton = createToggleButton("Start Auto Farm", y, function(isRunning)
     if isRunning then
         task.spawn(function()
-            while autoFarmButton.Text:find("Stop") do
+            while isRunning do
                 game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Farming_AutoFarm"):FireServer()
                 task.wait(2)
             end
@@ -180,7 +202,7 @@ y = y + 45
 local autoPlantButton = createToggleButton("Start Auto Plant", y, function(isRunning)
     if isRunning then
         task.spawn(function()
-            while autoPlantButton.Text:find("Stop") do
+            while isRunning do
                 local args = {"7bd389d1c6c941dfa53e26e2c3e0910f"}
                 game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("FarmingHold_Start"):FireServer(unpack(args))
                 task.wait(2)
