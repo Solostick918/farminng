@@ -4,6 +4,10 @@ local player = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 local network = rs:WaitForChild("Network")
 
+-- Define tabs
+local tabs = {"Farming", "Mining", "Merchants", "Settings"}
+local selectedTab = "Farming"
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "FarmingHubGUI"
 screenGui.ResetOnSpawn = false
@@ -178,7 +182,6 @@ showBtn.MouseButton1Click:Connect(showGUI)
 
 -- Tab switching function
 local tabFrames = {}
-local selectedTab = "Farming"
 
 -- Section Header (modern, bold, blue underline)
 function createSectionHeader(parent, text, y)
