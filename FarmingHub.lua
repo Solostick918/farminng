@@ -185,6 +185,26 @@ local auraEggButton = createToggleButton("Start Aura Egg Merchant", y, function(
 end)
 y = y + 45
 
+-- Aura Merchant Section
+y = createSectionHeader("Aura Merchant", y)
+local auraMerchantButton = createToggleButton("Start Aura Merchant", y, function(isRunning)
+    if isRunning then
+        task.spawn(function()
+            while isRunning do
+                for i = 1, 10 do
+                    local args = {
+                        i
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraMerchant_Purchase"):InvokeServer(unpack(args))
+                    task.wait(0.1)
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+end)
+y = y + 45
+
 -- Farming Section
 y = createSectionHeader("Farming", y)
 local autoFarmButton = createToggleButton("Start Auto Farm", y, function(isRunning)
