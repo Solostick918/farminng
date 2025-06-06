@@ -33,7 +33,7 @@ local ACTIVE_BUTTON_TEXT = Color3.fromRGB(255,255,255)
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 320, 0, 320)
+mainFrame.Size = UDim2.new(0, 260, 0, 320)
 mainFrame.Position = UDim2.new(0, 200, 0, 120)
 mainFrame.BackgroundColor3 = BG_COLOR
 mainFrame.BorderColor3 = BORDER_COLOR
@@ -43,7 +43,7 @@ mainFrame.Parent = screenGui
 
 -- Top Tab Bar
 local tabBar = Instance.new("Frame")
-tabBar.Size = UDim2.new(1, 0, 0, 32)
+tabBar.Size = UDim2.new(1, 0, 0, 36)
 tabBar.Position = UDim2.new(0, 0, 0, 0)
 tabBar.BackgroundColor3 = BG_COLOR
 tabBar.BorderSizePixel = 0
@@ -172,31 +172,31 @@ end
 -- Section Header Helper
 local function createSectionHeader(parent, text, y)
 	local header = Instance.new("TextLabel")
-	header.Size = UDim2.new(1, -20, 0, 22)
-	header.Position = UDim2.new(0, 10, 0, y)
+	header.Size = UDim2.new(1, -12, 0, 18)
+	header.Position = UDim2.new(0, 6, 0, y)
 	header.BackgroundColor3 = SECTION_HEADER_BG
 	header.BorderColor3 = BORDER_COLOR
 	header.BorderSizePixel = 1
 	header.TextColor3 = SECTION_HEADER_TEXT
 	header.Font = FONT
-	header.TextSize = 15
+	header.TextSize = 13
 	header.Text = text
 	header.TextXAlignment = Enum.TextXAlignment.Left
 	header.Parent = parent
-	return y + 28
+	return y + 20
 end
 
 -- Flat Button Helper (smaller)
 local function createFlatButton(parent, text, y, color, borderColor, callback)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, -20, 0, 24)
-	btn.Position = UDim2.new(0, 10, 0, y)
+	btn.Size = UDim2.new(1, -12, 0, 18)
+	btn.Position = UDim2.new(0, 6, 0, y)
 	btn.BackgroundColor3 = color or BUTTON_BG
 	btn.BorderColor3 = borderColor or BUTTON_BORDER
 	btn.BorderSizePixel = 1
 	btn.TextColor3 = BUTTON_TEXT
 	btn.Font = FONT
-	btn.TextSize = 13
+	btn.TextSize = 12
 	btn.Text = text
 	btn.Parent = parent
 	btn.MouseEnter:Connect(function()
@@ -206,7 +206,7 @@ local function createFlatButton(parent, text, y, color, borderColor, callback)
 		btn.BackgroundColor3 = color or BUTTON_BG
 	end)
 	btn.MouseButton1Click:Connect(callback)
-	return btn, y + 28
+	return btn, y + 20
 end
 
 -- Flat Checkbox Helper (smaller)
@@ -771,4 +771,30 @@ y3 = y3b
 local iceFishingMerchantBtn, y3b = makeMerchantToggle("IceFishingMerchant (1-6)", 6, y3, "IceFishingMerchant")
 y3 = y3b
 
-switchTab(selectedTab) 
+switchTab(selectedTab)
+
+-- Make resizer frames for all edges/corners
+local resizerEdges = {"TopLeft", "Top", "TopRight", "Right", "BottomRight", "Bottom", "BottomLeft", "Left"}
+for _, edge in ipairs(resizerEdges) do
+	local edgeFrame = Instance.new("Frame")
+	edgeFrame.Name = "Resizer" .. edge
+	edgeFrame.Size = UDim2.new(0, 10, 0, 10)
+	edgeFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+	edgeFrame.BorderSizePixel = 0
+	edgeFrame.Parent = mainFrame
+	edgeFrame.Active = true
+	-- Position each edge/corner appropriately (pseudo, adjust as needed)
+	if edge == "TopLeft" then edgeFrame.Position = UDim2.new(0, 0, 0, 0)
+	elseif edge == "Top" then edgeFrame.Position = UDim2.new(0.5, -5, 0, 0)
+	elseif edge == "TopRight" then edgeFrame.Position = UDim2.new(1, -10, 0, 0)
+	elseif edge == "Right" then edgeFrame.Position = UDim2.new(1, -10, 0.5, -5)
+	elseif edge == "BottomRight" then edgeFrame.Position = UDim2.new(1, -10, 1, -10)
+	elseif edge == "Bottom" then edgeFrame.Position = UDim2.new(0.5, -5, 1, -10)
+	elseif edge == "BottomLeft" then edgeFrame.Position = UDim2.new(0, 0, 1, -10)
+	elseif edge == "Left" then edgeFrame.Position = UDim2.new(0, 0, 0.5, -5)
+	end
+	-- Add resizing logic for each edge/corner (reuse existing resizing logic, but for each frame)
+end
+
+-- Ensure all settings fit in the visible area by default (no scrolling needed)
+settingsScroll.CanvasSize = UDim2.new(0, 0, 0, 220) 
