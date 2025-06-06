@@ -10,17 +10,16 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- Modern color palette
-local BORDER_COLOR = Color3.fromRGB(60, 60, 60)
+local BORDER_COLOR = Color3.fromRGB(50, 50, 60)
 local BG_COLOR = Color3.fromRGB(28, 28, 34)
 local TAB_BG = Color3.fromRGB(38, 38, 46)
-local TAB_ACTIVE_BG = Color3.fromRGB(48, 48, 60)
+local TAB_ACTIVE_BG = Color3.fromRGB(60, 90, 140)
 local TAB_TEXT = Color3.fromRGB(230, 230, 235)
 local SECTION_HEADER_BG = Color3.fromRGB(28, 28, 34)
-local SECTION_HEADER_TEXT = Color3.fromRGB(120, 180, 255)
+local SECTION_HEADER_TEXT = Color3.fromRGB(122, 184, 245) -- #7ab8f5
 local BUTTON_BG = Color3.fromRGB(38, 38, 46)
-local BUTTON_BORDER = Color3.fromRGB(60, 60, 60)
 local BUTTON_TEXT = Color3.fromRGB(230, 230, 235)
-local BUTTON_HOVER_BG = Color3.fromRGB(60, 80, 120)
+local BUTTON_HOVER_BG = Color3.fromRGB(122, 184, 245)
 local BUTTON_ACTIVE_BG = Color3.fromRGB(80, 120, 180)
 local BUTTON_ACTIVE_TEXT = Color3.fromRGB(255,255,255)
 local FONT = Enum.Font.Gotham
@@ -31,48 +30,46 @@ local ACTIVE_BUTTON_TEXT = Color3.fromRGB(255,255,255)
 
 -- Main Frame (rounded, drop shadow)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 320, 0, 340)
+mainFrame.Size = UDim2.new(0, 340, 0, 380)
 mainFrame.Position = UDim2.new(0, 200, 0, 120)
 mainFrame.BackgroundColor3 = BG_COLOR
-mainFrame.BorderColor3 = BORDER_COLOR
-mainFrame.BorderSizePixel = 1
+mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Parent = screenGui
 local mainCorner = Instance.new("UICorner", mainFrame)
-mainCorner.CornerRadius = UDim.new(0, 12)
+mainCorner.CornerRadius = UDim.new(0, 14)
 local mainShadow = Instance.new("ImageLabel", mainFrame)
 mainShadow.BackgroundTransparency = 1
 mainShadow.Image = "rbxassetid://1316045217"
-mainShadow.Size = UDim2.new(1, 24, 1, 24)
-mainShadow.Position = UDim2.new(0, -12, 0, -12)
+mainShadow.Size = UDim2.new(1, 32, 1, 32)
+mainShadow.Position = UDim2.new(0, -16, 0, -16)
 mainShadow.ZIndex = 0
-mainShadow.ImageTransparency = 0.7
+mainShadow.ImageTransparency = 0.8
 mainShadow.ScaleType = Enum.ScaleType.Slice
 mainShadow.SliceCenter = Rect.new(10,10,118,118)
 
--- Top Tab Bar (flat, rounded, accent for active)
+-- Top Tab Bar (flat, rounded, blue accent for active)
 local tabBar = Instance.new("Frame")
-tabBar.Size = UDim2.new(1, 0, 0, 40)
+tabBar.Size = UDim2.new(1, 0, 0, 44)
 tabBar.Position = UDim2.new(0, 0, 0, 0)
 tabBar.BackgroundColor3 = BG_COLOR
 tabBar.BorderSizePixel = 0
 local tabBarCorner = Instance.new("UICorner", tabBar)
-tabBarCorner.CornerRadius = UDim.new(0, 10)
-local tabBtnW = 74
+tabBarCorner.CornerRadius = UDim.new(0, 12)
+local tabBtnW = 80
 for i, tabName in ipairs(tabs) do
 	local tabBtn = Instance.new("TextButton")
 	tabBtn.Size = UDim2.new(0, tabBtnW, 0, 32)
-	tabBtn.Position = UDim2.new(0, 8 + (i-1)*(tabBtnW+4), 0, 4)
+	tabBtn.Position = UDim2.new(0, 12 + (i-1)*(tabBtnW+6), 0, 6)
 	tabBtn.BackgroundColor3 = (tabName == selectedTab) and TAB_ACTIVE_BG or TAB_BG
-	tabBtn.BorderColor3 = BORDER_COLOR
 	tabBtn.BorderSizePixel = 0
-	tabBtn.TextColor3 = TAB_TEXT
+	tabBtn.TextColor3 = (tabName == selectedTab) and SECTION_HEADER_TEXT or TAB_TEXT
 	tabBtn.Font = FONT
 	tabBtn.TextSize = 18
 	tabBtn.Text = tabName
 	tabBtn.Parent = tabBar
 	local btnCorner = Instance.new("UICorner", tabBtn)
-	btnCorner.CornerRadius = UDim.new(0, 8)
+	btnCorner.CornerRadius = UDim.new(0, 10)
 	tabBtn.MouseEnter:Connect(function()
 		tabBtn.BackgroundColor3 = (tabName == selectedTab) and BUTTON_ACTIVE_BG or BUTTON_HOVER_BG
 	end)
@@ -87,6 +84,7 @@ for i, tabName in ipairs(tabs) do
 		for _, btn in ipairs(tabBar:GetChildren()) do
 			if btn:IsA("TextButton") then
 				btn.BackgroundColor3 = (btn.Text == selectedTab) and TAB_ACTIVE_BG or TAB_BG
+				btn.TextColor3 = (btn.Text == selectedTab) and SECTION_HEADER_TEXT or TAB_TEXT
 			end
 		end
 	end)
@@ -182,52 +180,53 @@ showBtn.MouseButton1Click:Connect(showGUI)
 local tabFrames = {}
 local selectedTab = "Farming"
 
--- Section Header (modern, bold, accent underline)
+-- Section Header (modern, bold, blue underline)
 function createSectionHeader(parent, text, y)
 	local header = Instance.new("TextLabel")
-	header.Size = UDim2.new(1, -16, 0, 22)
-	header.Position = UDim2.new(0, 8, 0, y)
+	header.Size = UDim2.new(1, -20, 0, 26)
+	header.Position = UDim2.new(0, 10, 0, y)
 	header.BackgroundTransparency = 1
 	header.TextColor3 = SECTION_HEADER_TEXT
 	header.Font = FONT
-	header.TextSize = 16
+	header.TextSize = 18
 	header.Text = text
 	header.TextXAlignment = Enum.TextXAlignment.Left
-	header.TextStrokeTransparency = 0.7
+	header.TextStrokeTransparency = 0.8
 	header.TextStrokeColor3 = Color3.fromRGB(0,0,0)
 	header.TextWrapped = true
 	header.Parent = parent
 	local underline = Instance.new("Frame", header)
-	underline.Size = UDim2.new(0, 40, 0, 2)
+	underline.Size = UDim2.new(0, 48, 0, 2)
 	underline.Position = UDim2.new(0, 0, 1, -2)
 	underline.BackgroundColor3 = SECTION_HEADER_TEXT
 	underline.BorderSizePixel = 0
-	return y + 28
+	return y + 32
 end
 
--- Flat Button (modern, rounded, hover/active)
+-- Flat Button (modern, rounded, blue hover/active)
 function createFlatButton(parent, text, y, color, borderColor, callback)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, -16, 0, 24)
-	btn.Position = UDim2.new(0, 8, 0, y)
+	btn.Size = UDim2.new(1, -20, 0, 28)
+	btn.Position = UDim2.new(0, 10, 0, y)
 	btn.BackgroundColor3 = color or BUTTON_BG
-	btn.BorderColor3 = borderColor or BUTTON_BORDER
 	btn.BorderSizePixel = 0
 	btn.TextColor3 = BUTTON_TEXT
 	btn.Font = FONT
-	btn.TextSize = 14
+	btn.TextSize = 15
 	btn.Text = text
 	btn.Parent = parent
 	local btnCorner = Instance.new("UICorner", btn)
-	btnCorner.CornerRadius = UDim.new(0, 8)
+	btnCorner.CornerRadius = UDim.new(0, 10)
 	btn.MouseEnter:Connect(function()
 		btn.BackgroundColor3 = BUTTON_HOVER_BG
+		btn.TextColor3 = BUTTON_ACTIVE_TEXT
 	end)
 	btn.MouseLeave:Connect(function()
 		btn.BackgroundColor3 = color or BUTTON_BG
+		btn.TextColor3 = BUTTON_TEXT
 	end)
 	btn.MouseButton1Click:Connect(callback)
-	return btn, y + 28
+	return btn, y + 36
 end
 
 -- Flat Checkbox Helper (smaller)
@@ -796,15 +795,15 @@ switchTab(selectedTab)
 for _, edge in ipairs({"TopLeft", "TopRight", "BottomRight", "BottomLeft"}) do
 	local edgeFrame = Instance.new("Frame")
 	edgeFrame.Name = "Resizer" .. edge
-	edgeFrame.Size = UDim2.new(0, 12, 0, 12)
-	edgeFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	edgeFrame.Size = UDim2.new(0, 14, 0, 14)
+	edgeFrame.BackgroundColor3 = Color3.fromRGB(122, 184, 245)
 	edgeFrame.BorderSizePixel = 0
 	edgeFrame.Parent = mainFrame
 	edgeFrame.Active = true
-	if edge == "TopLeft" then edgeFrame.Position = UDim2.new(0, -6, 0, -6)
-	elseif edge == "TopRight" then edgeFrame.Position = UDim2.new(1, -6, 0, -6)
-	elseif edge == "BottomRight" then edgeFrame.Position = UDim2.new(1, -6, 1, -6)
-	elseif edge == "BottomLeft" then edgeFrame.Position = UDim2.new(0, -6, 1, -6)
+	if edge == "TopLeft" then edgeFrame.Position = UDim2.new(0, -7, 0, -7)
+	elseif edge == "TopRight" then edgeFrame.Position = UDim2.new(1, -7, 0, -7)
+	elseif edge == "BottomRight" then edgeFrame.Position = UDim2.new(1, -7, 1, -7)
+	elseif edge == "BottomLeft" then edgeFrame.Position = UDim2.new(0, -7, 1, -7)
 	end
 end
 
