@@ -154,9 +154,9 @@ local auraEggButton = createToggleButton("Start Aura Egg Merchant", y, function(
                         i
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
-                    task.wait(0.1)
+                    task.wait(0.5) -- Increased wait time between purchases
                 end
-                task.wait(1)
+                task.wait(2) -- Increased wait time between cycles
             end
         end)
     end
