@@ -176,9 +176,9 @@ local auraEggButton = createToggleButton("Start Aura Egg Merchant", y, function(
                         i
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("CustomMerchants_Purchase"):InvokeServer(unpack(args))
-                    task.wait(0.1)
+                    task.wait(0.01) -- Much faster
                 end
-                task.wait(0.5)
+                task.wait(0.1) -- Much faster
             end
         end)
     end
@@ -196,9 +196,26 @@ local auraMerchantButton = createToggleButton("Start Aura Merchant", y, function
                         i
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraMerchant_Purchase"):InvokeServer(unpack(args))
-                    task.wait(0.1)
+                    task.wait(0.01) -- Much faster
                 end
-                task.wait(0.5)
+                task.wait(0.1) -- Much faster
+            end
+        end)
+    end
+end)
+y = y + 45
+
+-- Aura Crafting Section
+y = createSectionHeader("Aura Crafting", y)
+local auraCraftButton = createToggleButton("Start Aura Crafting", y, function(isRunning)
+    if isRunning then
+        task.spawn(function()
+            while isRunning do
+                local args = {
+                    "Aura Shard"
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraCrafting_Craft"):InvokeServer(unpack(args))
+                task.wait(0.01) -- Very fast crafting
             end
         end)
     end
