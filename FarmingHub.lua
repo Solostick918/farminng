@@ -402,7 +402,6 @@ local function enableAllOptimizations()
 	if not unusedScriptsRemoved then setUnusedScriptsRemoved(true) unusedScriptsBtn.Text = "Restore Unused Scripts" end
 	if not unusedModelsRemoved then setUnusedModelsRemoved(true) unusedModelsBtn.Text = "Restore Unused Models" end
 	if not unusedGuisRemoved then setUnusedGuisRemoved(true) unusedGuisBtn.Text = "Restore Unused Guis" end
-	if not unusedMeshesRemoved then setUnusedMeshesRemoved(true) unusedMeshesBtn.Text = "Restore Unused Meshes" end
 end
 local allBtn, yOptAll = createFlatButton(settingsScroll, "Enable All Optimizations", yOpt, BUTTON_BG, BUTTON_BORDER, enableAllOptimizations)
 
@@ -635,21 +634,6 @@ end
 local unusedGuisBtn, yOpt16 = createFlatButton(settingsScroll, "Remove Unused Billboard/SurfaceGuis", yOpt15, BUTTON_BG, BUTTON_BORDER, function()
 	setUnusedGuisRemoved(not unusedGuisRemoved)
 	unusedGuisBtn.Text = (unusedGuisRemoved and "Restore Unused Guis") or "Remove Unused Billboard/SurfaceGuis"
-end)
-
--- 16. Remove Unused Meshes
-local unusedMeshesRemoved = false
-local function setUnusedMeshesRemoved(val)
-	unusedMeshesRemoved = val
-	for _, obj in ipairs(workspace:GetDescendants()) do
-		if obj:IsA("MeshPart") and obj.Transparency == 1 then
-			obj.Parent = val and nil or workspace
-		end
-	end
-end
-local unusedMeshesBtn, yOpt17 = createFlatButton(settingsScroll, "Remove Unused Meshes", yOpt16, BUTTON_BG, BUTTON_BORDER, function()
-	setUnusedMeshesRemoved(not unusedMeshesRemoved)
-	unusedMeshesBtn.Text = (unusedMeshesRemoved and "Restore Unused Meshes") or "Remove Unused Meshes"
 end)
 
 -- Mining Tab
