@@ -26,6 +26,10 @@ local BUTTON_TEXT = Color3.fromRGB(230, 230, 235)
 local BUTTON_HOVER_BG = Color3.fromRGB(122, 184, 245)
 local BUTTON_ACTIVE_BG = Color3.fromRGB(80, 120, 180)
 local BUTTON_ACTIVE_TEXT = Color3.fromRGB(255,255,255)
+local BUTTON_BORDER = Color3.fromRGB(50, 50, 60)
+local CHECKBOX_UNCHECKED = Color3.fromRGB(38, 38, 46)
+local CHECKBOX_CHECKED = Color3.fromRGB(122, 184, 245)
+local CHECKBOX_BORDER = Color3.fromRGB(50, 50, 60)
 local FONT = Enum.Font.Gotham
 
 -- Update color scheme for readability
