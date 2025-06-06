@@ -366,8 +366,6 @@ local killBtn, yS2 = createFlatButton(settingsScroll, "🛑 KILL SCRIPT", yS, BU
 	screenGui:Destroy()
 end)
 yS = yS2
-
--- Reload Script Button
 local function reloadScript()
 	for k in pairs(running) do running[k] = false end
 	screenGui:Destroy()
