@@ -8,12 +8,13 @@ local network = rs:WaitForChild("Network")
 local COLORS = {
     PRIMARY = Color3.fromRGB(0, 170, 255),    -- Blue
     SECONDARY = Color3.fromRGB(40, 40, 40),   -- Dark Gray
-    BACKGROUND = Color3.fromRGB(30, 30, 30),  -- Darker Gray
-    TEXT = Color3.fromRGB(255, 255, 255),     -- White
+    BACKGROUND = Color3.fromRGB(24, 24, 28),  -- Softer dark
+    TEXT = Color3.fromRGB(240, 240, 240),     -- Light Gray
     BORDER = Color3.fromRGB(60, 60, 60),      -- Border Gray
     SUCCESS = Color3.fromRGB(0, 255, 128),    -- Green
     WARNING = Color3.fromRGB(255, 170, 0),    -- Orange
-    DANGER = Color3.fromRGB(255, 50, 50)      -- Red
+    DANGER = Color3.fromRGB(255, 50, 50),     -- Red
+    TOPBAR = Color3.fromRGB(30, 40, 60)       -- Subtle blue-gray
 }
 
 -- Create GUI
@@ -24,45 +25,60 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 400)
-mainFrame.Position = UDim2.new(0, 20, 0, 20)
+mainFrame.Size = UDim2.new(0, 340, 0, 500)
+mainFrame.Position = UDim2.new(0, 40, 0, 40)
 mainFrame.BackgroundColor3 = COLORS.BACKGROUND
 mainFrame.BorderColor3 = COLORS.BORDER
-mainFrame.BorderSizePixel = 1
+mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Parent = screenGui
+mainFrame.ClipsDescendants = true
+mainFrame.AnchorPoint = Vector2.new(0,0)
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 16)
+mainCorner.Parent = mainFrame
 
--- Title Bar
+-- Top Bar
 local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 40)
+titleBar.Size = UDim2.new(1, 0, 0, 38)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
-titleBar.BackgroundColor3 = COLORS.SECONDARY
+titleBar.BackgroundColor3 = COLORS.TOPBAR
 titleBar.BorderSizePixel = 0
 titleBar.Parent = mainFrame
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(0, 16)
+barCorner.Parent = titleBar
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 1, 0)
+title.Size = UDim2.new(1, -24, 1, 0)
+title.Position = UDim2.new(0, 12, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "Modern Farming Hub"
+title.Text = "Farming Hub"
 title.TextColor3 = COLORS.TEXT
 title.Font = Enum.Font.GothamBold
-title.TextSize = 18
+title.TextSize = 20
+title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
 -- Content Frame
 local contentFrame = Instance.new("ScrollingFrame")
-contentFrame.Size = UDim2.new(1, 0, 1, -40)
-contentFrame.Position = UDim2.new(0, 0, 0, 40)
+contentFrame.Size = UDim2.new(1, -24, 1, -56)
+contentFrame.Position = UDim2.new(0, 12, 0, 44)
 contentFrame.BackgroundTransparency = 1
 contentFrame.BorderSizePixel = 0
 contentFrame.ScrollBarThickness = 6
-contentFrame.CanvasSize = UDim2.new(0, 0, 0, 500)
+contentFrame.CanvasSize = UDim2.new(0, 0, 0, 900)
 contentFrame.Parent = mainFrame
+local contentPad = Instance.new("UIPadding")
+contentPad.PaddingTop = UDim.new(0, 8)
+contentPad.PaddingBottom = UDim.new(0, 8)
+contentPad.PaddingLeft = UDim.new(0, 4)
+contentPad.PaddingRight = UDim.new(0, 4)
+contentPad.Parent = contentFrame
 
 -- Make GUI Draggable
 local dragging, dragInput, dragStart, startPos
 local UIS = game:GetService("UserInputService")
-
 titleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
@@ -75,13 +91,11 @@ titleBar.InputBegan:Connect(function(input)
         end)
     end
 end)
-
 titleBar.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement then
         dragInput = input
     end
 end)
-
 UIS.InputChanged:Connect(function(input)
     if input == dragInput and dragging then
         local delta = input.Position - dragStart
@@ -92,24 +106,25 @@ end)
 -- Button Creation Function
 local function createButton(text, y, color, callback)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, -20, 0, 40)
-    button.Position = UDim2.new(0, 10, 0, y)
+    button.Size = UDim2.new(1, 0, 0, 38)
+    button.Position = UDim2.new(0, 0, 0, y)
     button.BackgroundColor3 = color or COLORS.PRIMARY
     button.BorderSizePixel = 0
     button.Text = text
     button.TextColor3 = COLORS.TEXT
     button.Font = Enum.Font.GothamSemibold
-    button.TextSize = 14
+    button.TextSize = 16
     button.Parent = contentFrame
-    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.Parent = button
     -- Hover effect
     button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = color:Lerp(Color3.new(1, 1, 1), 0.1)
+        button.BackgroundColor3 = (color or COLORS.PRIMARY):Lerp(Color3.new(1, 1, 1), 0.08)
     end)
     button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = color
+        button.BackgroundColor3 = color or COLORS.PRIMARY
     end)
-    
     button.MouseButton1Click:Connect(callback)
     return button
 end
@@ -117,39 +132,40 @@ end
 -- Section Header Function
 local function createSectionHeader(text, y)
     local header = Instance.new("TextLabel")
-    header.Size = UDim2.new(1, -20, 0, 30)
-    header.Position = UDim2.new(0, 10, 0, y)
+    header.Size = UDim2.new(1, 0, 0, 30)
+    header.Position = UDim2.new(0, 0, 0, y)
     header.BackgroundTransparency = 1
     header.Text = text
     header.TextColor3 = COLORS.TEXT
     header.Font = Enum.Font.GothamBold
-    header.TextSize = 16
+    header.TextSize = 18
     header.TextXAlignment = Enum.TextXAlignment.Left
     header.Parent = contentFrame
-    return y + 35
+    return y + 38
 end
 
 -- Toggle Button Function
 local function createToggleButton(text, y, callback)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, -20, 0, 40)
-    button.Position = UDim2.new(0, 10, 0, y)
+    button.Size = UDim2.new(1, 0, 0, 38)
+    button.Position = UDim2.new(0, 0, 0, y)
     button.BackgroundColor3 = COLORS.SECONDARY
     button.BorderSizePixel = 0
     button.Text = text
     button.TextColor3 = COLORS.TEXT
     button.Font = Enum.Font.GothamSemibold
-    button.TextSize = 14
+    button.TextSize = 16
     button.Parent = contentFrame
-    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.Parent = button
     -- Hover effect
     button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = COLORS.SECONDARY:Lerp(Color3.new(1, 1, 1), 0.1)
+        button.BackgroundColor3 = COLORS.SECONDARY:Lerp(Color3.new(1, 1, 1), 0.08)
     end)
     button.MouseLeave:Connect(function()
         button.BackgroundColor3 = COLORS.SECONDARY
     end)
-    
     local isRunning = false
     button.MouseButton1Click:Connect(function()
         isRunning = not isRunning
@@ -157,9 +173,34 @@ local function createToggleButton(text, y, callback)
         button.BackgroundColor3 = isRunning and COLORS.SUCCESS or COLORS.SECONDARY
         callback(isRunning)
     end)
-    
     return button
 end
+
+-- Show/Hide GUI Button
+local showBtn = Instance.new("TextButton")
+showBtn.Size = UDim2.new(0, 120, 0, 32)
+showBtn.Position = UDim2.new(0.5, -60, 0, 20)
+showBtn.BackgroundColor3 = COLORS.TOPBAR
+showBtn.BorderSizePixel = 0
+showBtn.TextColor3 = COLORS.TEXT
+showBtn.Font = Enum.Font.GothamSemibold
+showBtn.TextSize = 16
+showBtn.Text = "Show GUI"
+showBtn.Visible = false
+local showCorner = Instance.new("UICorner")
+showCorner.CornerRadius = UDim.new(0, 12)
+showCorner.Parent = showBtn
+showBtn.Parent = screenGui
+
+local function hideGUI()
+    mainFrame.Visible = false
+    showBtn.Visible = true
+end
+local function showGUI()
+    mainFrame.Visible = true
+    showBtn.Visible = false
+end
+showBtn.MouseButton1Click:Connect(showGUI)
 
 -- Initialize buttons
 local y = 10
@@ -263,16 +304,23 @@ local autoPlantButton = createToggleButton("Start Auto Plant", y, function(isRun
 end)
 y = y + 45
 
+-- Egg Rolling Section
+y = createSectionHeader("Egg Rolling", y)
+local eggRollButton = createToggleButton("Start Egg Rolling", y, function(isRunning)
+    if isRunning then
+        task.spawn(function()
+            while isRunning do
+                game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Eggs_Roll"):InvokeServer()
+            end
+        end)
+    end
+end)
+y = y + 45
+
 -- Settings Section
 y = createSectionHeader("Settings", y)
 local hideButton = createButton("Hide GUI", y, COLORS.WARNING, function()
-    mainFrame.Visible = false
-    local showButton = createButton("Show GUI", 0, COLORS.PRIMARY, function()
-        mainFrame.Visible = true
-        showButton:Destroy()
-    end)
-    showButton.Position = UDim2.new(0, 20, 0, 20)
-    showButton.Parent = screenGui
+    hideGUI()
 end)
 y = y + 45
 
