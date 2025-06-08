@@ -4,6 +4,14 @@ local player = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 local network = rs:WaitForChild("Network")
 
+-- Define tabs
+local tabs = {
+    "Farming",
+    "Mining",
+    "Merchants",
+    "Settings"
+}
+
 -- Modern GUI Styles
 local COLORS = {
     PRIMARY = Color3.fromRGB(0, 170, 255),    -- Blue
