@@ -25,8 +25,8 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 340, 0, 500)
-mainFrame.Position = UDim2.new(0, 40, 0, 40)
+mainFrame.Size = UDim2.new(0, 280, 0, 400)
+mainFrame.Position = UDim2.new(0, 20, 0, 20)
 mainFrame.BackgroundColor3 = COLORS.BACKGROUND
 mainFrame.BorderColor3 = COLORS.BORDER
 mainFrame.BorderSizePixel = 0
@@ -35,45 +35,45 @@ mainFrame.Parent = screenGui
 mainFrame.ClipsDescendants = true
 mainFrame.AnchorPoint = Vector2.new(0,0)
 local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 16)
+mainCorner.CornerRadius = UDim.new(0, 12)
 mainCorner.Parent = mainFrame
 
 -- Top Bar
 local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 38)
+titleBar.Size = UDim2.new(1, 0, 0, 32)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
 titleBar.BackgroundColor3 = COLORS.TOPBAR
 titleBar.BorderSizePixel = 0
 titleBar.Parent = mainFrame
 local barCorner = Instance.new("UICorner")
-barCorner.CornerRadius = UDim.new(0, 16)
+barCorner.CornerRadius = UDim.new(0, 12)
 barCorner.Parent = titleBar
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -24, 1, 0)
-title.Position = UDim2.new(0, 12, 0, 0)
+title.Size = UDim2.new(1, -20, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "Farming Hub"
 title.TextColor3 = COLORS.TEXT
 title.Font = Enum.Font.GothamBold
-title.TextSize = 20
+title.TextSize = 18
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
 -- Content Frame
 local contentFrame = Instance.new("ScrollingFrame")
-contentFrame.Size = UDim2.new(1, -24, 1, -56)
-contentFrame.Position = UDim2.new(0, 12, 0, 44)
+contentFrame.Size = UDim2.new(1, -16, 1, -48)
+contentFrame.Position = UDim2.new(0, 8, 0, 36)
 contentFrame.BackgroundTransparency = 1
 contentFrame.BorderSizePixel = 0
-contentFrame.ScrollBarThickness = 6
-contentFrame.CanvasSize = UDim2.new(0, 0, 0, 900)
+contentFrame.ScrollBarThickness = 4
+contentFrame.CanvasSize = UDim2.new(0, 0, 0, 800)
 contentFrame.Parent = mainFrame
 local contentPad = Instance.new("UIPadding")
-contentPad.PaddingTop = UDim.new(0, 8)
-contentPad.PaddingBottom = UDim.new(0, 8)
-contentPad.PaddingLeft = UDim.new(0, 4)
-contentPad.PaddingRight = UDim.new(0, 4)
+contentPad.PaddingTop = UDim.new(0, 6)
+contentPad.PaddingBottom = UDim.new(0, 6)
+contentPad.PaddingLeft = UDim.new(0, 2)
+contentPad.PaddingRight = UDim.new(0, 2)
 contentPad.Parent = contentFrame
 
 -- Make GUI Draggable
@@ -106,17 +106,17 @@ end)
 -- Button Creation Function
 local function createButton(text, y, color, callback)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, 0, 0, 38)
+    button.Size = UDim2.new(1, 0, 0, 32)
     button.Position = UDim2.new(0, 0, 0, y)
     button.BackgroundColor3 = color or COLORS.PRIMARY
     button.BorderSizePixel = 0
     button.Text = text
     button.TextColor3 = COLORS.TEXT
     button.Font = Enum.Font.GothamSemibold
-    button.TextSize = 16
+    button.TextSize = 14
     button.Parent = contentFrame
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.CornerRadius = UDim.new(0, 8)
     btnCorner.Parent = button
     -- Hover effect
     button.MouseEnter:Connect(function()
@@ -132,32 +132,32 @@ end
 -- Section Header Function
 local function createSectionHeader(text, y)
     local header = Instance.new("TextLabel")
-    header.Size = UDim2.new(1, 0, 0, 30)
+    header.Size = UDim2.new(1, 0, 0, 24)
     header.Position = UDim2.new(0, 0, 0, y)
     header.BackgroundTransparency = 1
     header.Text = text
     header.TextColor3 = COLORS.TEXT
     header.Font = Enum.Font.GothamBold
-    header.TextSize = 18
+    header.TextSize = 16
     header.TextXAlignment = Enum.TextXAlignment.Left
     header.Parent = contentFrame
-    return y + 38
+    return y + 32
 end
 
 -- Toggle Button Function
 local function createToggleButton(text, y, callback)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, 0, 0, 38)
+    button.Size = UDim2.new(1, 0, 0, 32)
     button.Position = UDim2.new(0, 0, 0, y)
     button.BackgroundColor3 = COLORS.SECONDARY
     button.BorderSizePixel = 0
     button.Text = text
     button.TextColor3 = COLORS.TEXT
     button.Font = Enum.Font.GothamSemibold
-    button.TextSize = 16
+    button.TextSize = 14
     button.Parent = contentFrame
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.CornerRadius = UDim.new(0, 8)
     btnCorner.Parent = button
     -- Hover effect
     button.MouseEnter:Connect(function()
@@ -203,7 +203,7 @@ end
 showBtn.MouseButton1Click:Connect(showGUI)
 
 -- Initialize buttons
-local y = 10
+local y = 8
 
 -- Aura Egg Merchant Section
 y = createSectionHeader("Aura Egg Merchant", y)
@@ -330,4 +330,4 @@ end)
 y = y + 45
 
 -- Update canvas size
-contentFrame.CanvasSize = UDim2.new(0, 0, 0, y + 10) 
+contentFrame.CanvasSize = UDim2.new(0, 0, 0, y + 8) 
