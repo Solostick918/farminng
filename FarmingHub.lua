@@ -184,6 +184,45 @@ local function createToggleButton(text, y, callback)
     return button
 end
 
+-- Checkbox Creation Function
+local function createCheckbox(text, y)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 0, 32)
+    container.Position = UDim2.new(0, 0, 0, y)
+    container.BackgroundTransparency = 1
+    container.Parent = contentFrame
+
+    local checkbox = Instance.new("TextButton")
+    checkbox.Size = UDim2.new(0, 20, 0, 20)
+    checkbox.Position = UDim2.new(0, 0, 0, 6)
+    checkbox.BackgroundColor3 = COLORS.SECONDARY
+    checkbox.BorderSizePixel = 0
+    checkbox.Text = ""
+    checkbox.Parent = container
+    local checkCorner = Instance.new("UICorner")
+    checkCorner.CornerRadius = UDim.new(0, 4)
+    checkCorner.Parent = checkbox
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -30, 1, 0)
+    label.Position = UDim2.new(0, 30, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = COLORS.TEXT
+    label.Font = Enum.Font.GothamSemibold
+    label.TextSize = 14
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = container
+
+    local isChecked = false
+    checkbox.MouseButton1Click:Connect(function()
+        isChecked = not isChecked
+        checkbox.BackgroundColor3 = isChecked and COLORS.SUCCESS or COLORS.SECONDARY
+    end)
+
+    return container, function() return isChecked end
+end
+
 -- Show/Hide GUI Button
 local showBtn = Instance.new("TextButton")
 showBtn.Size = UDim2.new(0, 120, 0, 32)
@@ -319,6 +358,40 @@ local eggRollButton = createToggleButton("Start Egg Rolling", y, function(isRunn
         task.spawn(function()
             while isRunning do
                 game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Eggs_Roll"):InvokeServer()
+            end
+        end)
+    end
+end)
+y = y + 45
+
+-- Aura Scrap Machine Section
+y = createSectionHeader("Aura Scrap Machine", y)
+local earthCheckbox, getEarthChecked = createCheckbox("Earth", y)
+y = y + 40
+local windCheckbox, getWindChecked = createCheckbox("Wind", y)
+y = y + 40
+
+local scrapButton = createToggleButton("Start Aura Scrap", y, function(isRunning)
+    if isRunning then
+        task.spawn(function()
+            while isRunning do
+                if getEarthChecked() then
+                    local args = {
+                        {
+                            ["301239fbd66a449b87fde7c06d4a5a6d"] = 99
+                        }
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
+                end
+                if getWindChecked() then
+                    local args = {
+                        {
+                            ["65f467a05622437595ae2f6320b5d77b"] = 96
+                        }
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
+                end
+                task.wait(1)
             end
         end)
     end
