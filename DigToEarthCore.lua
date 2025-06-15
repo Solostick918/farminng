@@ -3,6 +3,9 @@
 local player = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 
+-- Global running flag
+_G.DigToEarthCoreRunning = true
+
 -- Safe WaitForChild function with timeout and warning
 local function safeWaitForChild(parent, childName, timeout)
     local obj = parent:WaitForChild(childName, timeout or 10)
@@ -95,7 +98,7 @@ createButton("Start Gem Farm", y, function()
         if not remotes then return end
         local event = safeWaitForChild(remotes, "GemEvent", 10)
         if not event then return end
-        while true do
+        while _G.DigToEarthCoreRunning do
             local args = {
                 11,
                 "bye"
@@ -114,14 +117,15 @@ createButton("Start Treasure Farm", y, function()
         if not remotes then return end
         local event = safeWaitForChild(remotes, "TreasureEvent", 10)
         if not event then return end
-        while true do
+        while _G.DigToEarthCoreRunning do
             local treasures = {
                 "Chest2", "Fossil", "Cup2", "Cauldron", "Coffin", "Vault", "Vase", "Barrel", "TallVault"
             }
             for _, name in ipairs(treasures) do
+                if not _G.DigToEarthCoreRunning then break end
                 local args = {name}
                 event:FireServer(unpack(args))
-                task.wait(0.5)
+                task.wait(0.2)
             end
         end
     end)
@@ -130,5 +134,6 @@ y = y + 40
 
 -- Kill Script
 createButton("Kill Script", y, function()
+    _G.DigToEarthCoreRunning = false
     gui:Destroy()
 end) 
