@@ -2,7 +2,15 @@
 
 local player = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
-local remotes = rs:WaitForChild("Remotes")
+
+-- Safe WaitForChild function with timeout and warning
+local function safeWaitForChild(parent, childName, timeout)
+    local obj = parent:WaitForChild(childName, timeout or 10)
+    if not obj then
+        warn(childName .. " not found in " .. parent:GetFullName() .. " after " .. (timeout or 10) .. " seconds!")
+    end
+    return obj
+end
 
 -- Create GUI
 local gui = Instance.new("ScreenGui")
@@ -83,12 +91,16 @@ local y = 40
 -- Gem Farm
 createButton("Start Gem Farm", y, function()
     task.spawn(function()
+        local remotes = safeWaitForChild(rs, "Remotes", 10)
+        if not remotes then return end
+        local event = safeWaitForChild(remotes, "GemEvent", 10)
+        if not event then return end
         while true do
             local args = {
                 11,
                 "bye"
             }
-            remotes:WaitForChild("GemEvent"):FireServer(unpack(args))
+            event:FireServer(unpack(args))
             task.wait(1)
         end
     end)
@@ -98,11 +110,15 @@ y = y + 40
 -- Chicken Farm
 createButton("Start Chicken Farm", y, function()
     task.spawn(function()
+        local remotes = safeWaitForChild(rs, "Remotes", 10)
+        if not remotes then return end
+        local event = safeWaitForChild(remotes, "PetCageEvent", 10)
+        if not event then return end
         while true do
             local args = {
                 "Chicken"
             }
-            remotes:WaitForChild("PetCageEvent"):FireServer(unpack(args))
+            event:FireServer(unpack(args))
             task.wait(1)
         end
     end)
@@ -112,47 +128,34 @@ y = y + 40
 -- Treasure Farm
 createButton("Start Treasure Farm", y, function()
     task.spawn(function()
+        local remotes = safeWaitForChild(rs, "Remotes", 10)
+        if not remotes then return end
+        local event = safeWaitForChild(remotes, "TreasureEvent", 10)
+        if not event then return end
         while true do
             -- Chest2
-            local args = {
-                "Chest2"
-            }
-            remotes:WaitForChild("TreasureEvent"):FireServer(unpack(args))
+            local args = {"Chest2"}
+            event:FireServer(unpack(args))
             task.wait(0.5)
-            
             -- Fossil
-            local args = {
-                "Fossil"
-            }
-            remotes:WaitForChild("TreasureEvent"):FireServer(unpack(args))
+            args = {"Fossil"}
+            event:FireServer(unpack(args))
             task.wait(0.5)
-            
             -- Cup2
-            local args = {
-                "Cup2"
-            }
-            remotes:WaitForChild("TreasureEvent"):FireServer(unpack(args))
+            args = {"Cup2"}
+            event:FireServer(unpack(args))
             task.wait(0.5)
-            
             -- Cauldron
-            local args = {
-                "Cauldron"
-            }
-            remotes:WaitForChild("TreasureEvent"):FireServer(unpack(args))
+            args = {"Cauldron"}
+            event:FireServer(unpack(args))
             task.wait(0.5)
-            
             -- Coffin
-            local args = {
-                "Coffin"
-            }
-            remotes:WaitForChild("TreasureEvent"):FireServer(unpack(args))
+            args = {"Coffin"}
+            event:FireServer(unpack(args))
             task.wait(0.5)
-            
             -- Vault
-            local args = {
-                "Vault"
-            }
-            remotes:WaitForChild("TreasureEvent"):FireServer(unpack(args))
+            args = {"Vault"}
+            event:FireServer(unpack(args))
             task.wait(0.5)
         end
     end)
