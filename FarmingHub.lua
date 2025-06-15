@@ -223,6 +223,56 @@ local function createCheckbox(text, y)
     return container, function() return isChecked end
 end
 
+-- Radio Button Creation Function
+local function createRadioButton(text, y, group)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 0, 32)
+    container.Position = UDim2.new(0, 0, 0, y)
+    container.BackgroundTransparency = 1
+    container.Parent = contentFrame
+
+    local radio = Instance.new("TextButton")
+    radio.Size = UDim2.new(0, 20, 0, 20)
+    radio.Position = UDim2.new(0, 0, 0, 6)
+    radio.BackgroundColor3 = COLORS.SECONDARY
+    radio.BorderSizePixel = 0
+    radio.Text = ""
+    radio.Parent = container
+    local radioCorner = Instance.new("UICorner")
+    radioCorner.CornerRadius = UDim.new(0, 10)
+    radioCorner.Parent = radio
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -30, 1, 0)
+    label.Position = UDim2.new(0, 30, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = COLORS.TEXT
+    label.Font = Enum.Font.GothamSemibold
+    label.TextSize = 14
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = container
+
+    local isSelected = false
+    radio.MouseButton1Click:Connect(function()
+        if not isSelected then
+            -- Deselect all other buttons in the group
+            for _, btn in pairs(group) do
+                if btn ~= radio then
+                    btn.BackgroundColor3 = COLORS.SECONDARY
+                    btn.isSelected = false
+                end
+            end
+            isSelected = true
+            radio.BackgroundColor3 = COLORS.SUCCESS
+        end
+    end)
+
+    radio.isSelected = isSelected
+    table.insert(group, radio)
+    return container, function() return isSelected end
+end
+
 -- Show/Hide GUI Button
 local showBtn = Instance.new("TextButton")
 showBtn.Size = UDim2.new(0, 120, 0, 32)
@@ -370,6 +420,8 @@ local earthCheckbox, getEarthChecked = createCheckbox("Earth", y)
 y = y + 40
 local windCheckbox, getWindChecked = createCheckbox("Wind", y)
 y = y + 40
+local newCheckbox, getNewChecked = createCheckbox("New Aura", y)
+y = y + 40
 
 local isScrapRunning = false
 local scrapButton = createToggleButton("Start Aura Scrap", y, function(isRunning)
@@ -378,17 +430,43 @@ local scrapButton = createToggleButton("Start Aura Scrap", y, function(isRunning
         task.spawn(function()
             while isScrapRunning do
                 if getEarthChecked() then
+                    -- Try 99 first
                     local args = {
                         {
                             ["301239fbd66a449b87fde7c06d4a5a6d"] = 99
                         }
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
-                end
-                if getWindChecked() then
+                    task.wait(0.5)
+                    -- Then try 3
                     local args = {
                         {
-                            ["65f467a05622437595ae2f6320b5d77b"] = 96
+                            ["301239fbd66a449b87fde7c06d4a5a6d"] = 3
+                        }
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
+                end
+                if getWindChecked() then
+                    -- Try 99 first
+                    local args = {
+                        {
+                            ["65f467a05622437595ae2f6320b5d77b"] = 99
+                        }
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
+                    task.wait(0.5)
+                    -- Then try 3
+                    local args = {
+                        {
+                            ["65f467a05622437595ae2f6320b5d77b"] = 3
+                        }
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
+                end
+                if getNewChecked() then
+                    local args = {
+                        {
+                            ["bda3ac6b817b4abd9c97c729f6791b9b"] = 40
                         }
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
