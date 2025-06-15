@@ -107,24 +107,6 @@ createButton("Start Gem Farm", y, function()
 end)
 y = y + 40
 
--- Chicken Farm
-createButton("Start Chicken Farm", y, function()
-    task.spawn(function()
-        local remotes = safeWaitForChild(rs, "Remotes", 10)
-        if not remotes then return end
-        local event = safeWaitForChild(remotes, "PetCageEvent", 10)
-        if not event then return end
-        while true do
-            local args = {
-                "Chicken"
-            }
-            event:FireServer(unpack(args))
-            task.wait(1)
-        end
-    end)
-end)
-y = y + 40
-
 -- Treasure Farm
 createButton("Start Treasure Farm", y, function()
     task.spawn(function()
@@ -133,30 +115,14 @@ createButton("Start Treasure Farm", y, function()
         local event = safeWaitForChild(remotes, "TreasureEvent", 10)
         if not event then return end
         while true do
-            -- Chest2
-            local args = {"Chest2"}
-            event:FireServer(unpack(args))
-            task.wait(0.5)
-            -- Fossil
-            args = {"Fossil"}
-            event:FireServer(unpack(args))
-            task.wait(0.5)
-            -- Cup2
-            args = {"Cup2"}
-            event:FireServer(unpack(args))
-            task.wait(0.5)
-            -- Cauldron
-            args = {"Cauldron"}
-            event:FireServer(unpack(args))
-            task.wait(0.5)
-            -- Coffin
-            args = {"Coffin"}
-            event:FireServer(unpack(args))
-            task.wait(0.5)
-            -- Vault
-            args = {"Vault"}
-            event:FireServer(unpack(args))
-            task.wait(0.5)
+            local treasures = {
+                "Chest2", "Fossil", "Cup2", "Cauldron", "Coffin", "Vault", "Vase", "Barrel", "TallVault"
+            }
+            for _, name in ipairs(treasures) do
+                local args = {name}
+                event:FireServer(unpack(args))
+                task.wait(0.5)
+            end
         end
     end)
 end)
