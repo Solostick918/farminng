@@ -371,10 +371,12 @@ y = y + 40
 local windCheckbox, getWindChecked = createCheckbox("Wind", y)
 y = y + 40
 
+local isScrapRunning = false
 local scrapButton = createToggleButton("Start Aura Scrap", y, function(isRunning)
+    isScrapRunning = isRunning
     if isRunning then
         task.spawn(function()
-            while isRunning do
+            while isScrapRunning do
                 if getEarthChecked() then
                     local args = {
                         {
