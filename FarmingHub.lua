@@ -420,8 +420,6 @@ local earthCheckbox, getEarthChecked = createCheckbox("Earth", y)
 y = y + 40
 local windCheckbox, getWindChecked = createCheckbox("Wind", y)
 y = y + 40
-local newCheckbox, getNewChecked = createCheckbox("New Aura", y)
-y = y + 40
 
 local isScrapRunning = false
 local scrapButton = createToggleButton("Start Aura Scrap", y, function(isRunning)
@@ -438,7 +436,7 @@ local scrapButton = createToggleButton("Start Aura Scrap", y, function(isRunning
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
                     task.wait(0.5)
-                    -- Then try 3
+                    -- If 99 didn't work, try 3
                     local args = {
                         {
                             ["301239fbd66a449b87fde7c06d4a5a6d"] = 3
@@ -455,18 +453,10 @@ local scrapButton = createToggleButton("Start Aura Scrap", y, function(isRunning
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
                     task.wait(0.5)
-                    -- Then try 3
+                    -- If 99 didn't work, try 3
                     local args = {
                         {
                             ["65f467a05622437595ae2f6320b5d77b"] = 3
-                        }
-                    }
-                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
-                end
-                if getNewChecked() then
-                    local args = {
-                        {
-                            ["bda3ac6b817b4abd9c97c729f6791b9b"] = 40
                         }
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("AuraScrapMachine_Activate"):InvokeServer(unpack(args))
