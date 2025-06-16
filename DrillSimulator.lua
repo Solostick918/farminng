@@ -163,11 +163,19 @@ end
 -- Initialize buttons
 local y = 8
 
+-- Track running states
+local runningStates = {
+    spawnOres = false,
+    collectDrills = false,
+    autoSell = false
+}
+
 -- Spawn Ores Section
 local spawnOresButton = createToggleButton("Start Spawn Ores", y, function(isRunning)
+    runningStates.spawnOres = isRunning
     if isRunning then
         task.spawn(function()
-            while isRunning do
+            while runningStates.spawnOres do
                 game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("OreService"):WaitForChild("RE"):WaitForChild("RequestRandomOre"):FireServer()
                 task.wait(0.1)
             end
@@ -178,20 +186,23 @@ y = y + 45
 
 -- Collect Drills Section
 local collectDrillsButton = createToggleButton("Start Collect Drills", y, function(isRunning)
+    runningStates.collectDrills = isRunning
     if isRunning then
         task.spawn(function()
-            while isRunning do
+            while runningStates.collectDrills do
                 -- Collect Twin Drill
-                local args = {
-                    workspace:WaitForChild("Plots"):WaitForChild("Plot"):WaitForChild("Drills"):WaitForChild("Twin Drill")
-                }
-                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("PlotService"):WaitForChild("RE"):WaitForChild("CollectDrill"):FireServer(unpack(args))
+                local twinDrill = workspace:WaitForChild("Plots"):WaitForChild("Plot"):WaitForChild("Drills"):WaitForChild("Twin Drill")
+                if twinDrill then
+                    local args = {twinDrill}
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("PlotService"):WaitForChild("RE"):WaitForChild("CollectDrill"):FireServer(unpack(args))
+                end
                 
                 -- Collect Charged Drill
-                local args2 = {
-                    workspace:WaitForChild("Plots"):WaitForChild("Plot"):WaitForChild("Drills"):WaitForChild("Charged Drill")
-                }
-                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("PlotService"):WaitForChild("RE"):WaitForChild("CollectDrill"):FireServer(unpack(args2))
+                local chargedDrill = workspace:WaitForChild("Plots"):WaitForChild("Plot"):WaitForChild("Drills"):WaitForChild("Charged Drill")
+                if chargedDrill then
+                    local args2 = {chargedDrill}
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("PlotService"):WaitForChild("RE"):WaitForChild("CollectDrill"):FireServer(unpack(args2))
+                end
                 
                 task.wait(0.1)
             end
@@ -200,9 +211,17 @@ local collectDrillsButton = createToggleButton("Start Collect Drills", y, functi
 end)
 y = y + 45
 
--- Sell All Button
-local sellAllButton = createButton("Sell All Ores", y, COLORS.SUCCESS, function()
-    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("OreService"):WaitForChild("RE"):WaitForChild("SellAll"):FireServer()
+-- Sell All Button (Now a toggle)
+local sellAllButton = createToggleButton("Start Auto Sell", y, function(isRunning)
+    runningStates.autoSell = isRunning
+    if isRunning then
+        task.spawn(function()
+            while runningStates.autoSell do
+                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("OreService"):WaitForChild("RE"):WaitForChild("SellAll"):FireServer()
+                task.wait(0.1)
+            end
+        end)
+    end
 end)
 y = y + 45
 
@@ -213,7 +232,19 @@ end)
 y = y + 45
 
 local killButton = createButton("Kill Script", y, COLORS.DANGER, function()
+    -- Stop all running functions
+    runningStates.spawnOres = false
+    runningStates.collectDrills = false
+    runningStates.autoSell = false
+    
+    -- Wait a moment to ensure loops are terminated
+    task.wait(0.2)
+    
+    -- Destroy the GUI
     screenGui:Destroy()
+    
+    -- Force garbage collection
+    collectgarbage("collect")
 end)
 y = y + 45
 
