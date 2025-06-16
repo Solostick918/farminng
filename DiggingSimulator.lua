@@ -164,18 +164,55 @@ end
 -- Initialize buttons
 local y = 8
 
+-- Function to get the sand block
+local function getSandBlock()
+    local sandBlocks = workspace:WaitForChild("SandBlocks")
+    for _, block in pairs(sandBlocks:GetChildren()) do
+        if block.Name == "-19, 3.5, -220" then
+            return block
+        end
+    end
+    return nil
+end
+
 -- Auto Dig Section
 local autoDigButton = createToggleButton("Start Auto Dig", y, function(isRunning)
     if isRunning then
         task.spawn(function()
+            print("Auto Dig Started")
             while isRunning do
-                local bucket = player.Character:WaitForChild("Bucket")
-                local remoteClick = bucket:WaitForChild("RemoteClick")
-                local args = {workspace:WaitForChild("SandBlocks"):WaitForChild("-19, 3.5, -220")}
-                remoteClick:FireServer(unpack(args))
-                task.wait(0.1) -- Small delay to prevent spam
+                local success, err = pcall(function()
+                    local character = player.Character
+                    if character then
+                        local bucket = character:FindFirstChild("Bucket")
+                        if bucket then
+                            local remoteClick = bucket:FindFirstChild("RemoteClick")
+                            if remoteClick then
+                                local sandBlock = getSandBlock()
+                                if sandBlock then
+                                    remoteClick:FireServer(sandBlock)
+                                    print("Digging at block:", sandBlock.Name)
+                                else
+                                    print("Sand block not found")
+                                end
+                            else
+                                print("RemoteClick not found")
+                            end
+                        else
+                            print("Bucket not found")
+                        end
+                    else
+                        print("Character not found")
+                    end
+                end)
+                if not success then
+                    print("Error in auto dig:", err)
+                end
+                task.wait(0.1)
             end
         end)
+    else
+        print("Auto Dig Stopped")
     end
 end)
 y = y + 45
@@ -184,11 +221,25 @@ y = y + 45
 local autoSellButton = createToggleButton("Start Auto Sell", y, function(isRunning)
     if isRunning then
         task.spawn(function()
+            print("Auto Sell Started")
             while isRunning do
-                events:WaitForChild("AreaSell"):FireServer()
-                task.wait(1) -- Wait 1 second between sells
+                local success, err = pcall(function()
+                    local areaSell = events:FindFirstChild("AreaSell")
+                    if areaSell then
+                        areaSell:FireServer()
+                        print("Sold items")
+                    else
+                        print("AreaSell event not found")
+                    end
+                end)
+                if not success then
+                    print("Error in auto sell:", err)
+                end
+                task.wait(1)
             end
         end)
+    else
+        print("Auto Sell Stopped")
     end
 end)
 y = y + 45
