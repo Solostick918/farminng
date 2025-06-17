@@ -130,6 +130,15 @@ local function createResultEntry(text, y)
     return entry
 end
 
+-- Safe property getter
+local function getProperty(obj, prop)
+    local success, value = pcall(function() return obj[prop] end)
+    if success then
+        return value
+    end
+    return nil
+end
+
 -- Scan function
 local function scanOres()
     -- Clear previous results
@@ -151,38 +160,13 @@ local function scanOres()
             -- Scan children of block region
             for _, child in pairs(obj:GetDescendants()) do
                 if child:IsA("BasePart") then
-                    -- Get all properties that might help identify the ore
-                    local properties = {
-                        "Name",
-                        "ClassName",
-                        "Material",
-                        "Color",
-                        "Transparency",
-                        "Anchored",
-                        "CanCollide",
-                        "Size",
-                        "Position"
-                    }
+                    local name = getProperty(child, "Name") or "Unknown"
+                    local material = getProperty(child, "Material")
+                    local materialName = material and material.Name or "Unknown"
                     
-                    local info = "  - Part: " .. child.Name .. "\n"
-                    for _, prop in ipairs(properties) do
-                        local success, value = pcall(function() return child[prop] end)
-                        if success and value ~= nil then
-                            if typeof(value) == "Vector3" then
-                                info = info .. string.format("    %s: X:%.1f Y:%.1f Z:%.1f\n", prop, value.X, value.Y, value.Z)
-                            else
-                                info = info .. string.format("    %s: %s\n", prop, tostring(value))
-                            end
-                        end
-                    end
-                    
-                    -- Try to get any custom properties
-                    for _, attr in pairs(child:GetAttributes()) do
-                        info = info .. string.format("    Attribute[%s]: %s\n", attr, tostring(child:GetAttribute(attr)))
-                    end
-                    
+                    local info = string.format("  - Part: %s (Material: %s)", name, materialName)
                     createResultEntry(info, y)
-                    y = y + spacing * 2  -- Extra spacing for multi-line entries
+                    y = y + spacing
                 end
             end
         end
