@@ -156,14 +156,14 @@ local autoMineButton = createToggleButton("Start Auto Mining", y, function(isRun
                                     if distance <= 10 then -- Adjust this value based on your game's needs
                                         local args = {ore}
                                         events:WaitForChild("MineOre"):FireServer(unpack(args))
-                                        task.wait(0.1) -- Small delay to prevent spam
+                                        task.wait(0.3) -- Increased delay to avoid getting kicked
                                     end
                                 end
                             end
                         end
                     end
                 end
-                task.wait(0.5) -- Check for ores every 0.5 seconds
+                task.wait(0.5) -- Increased check interval to be more conservative
             end
         end)
     end
