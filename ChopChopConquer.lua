@@ -264,4 +264,25 @@ local function killScript()
     
     -- Remove the script
     script:Destroy()
-end 
+end
+
+-- DEBUG KILL BUTTON (always visible, top right of screen)
+local killBtn = Instance.new("TextButton")
+killBtn.Size = UDim2.new(0, 120, 0, 50)
+killBtn.Position = UDim2.new(1, -130, 0, 10) -- Top right corner of the screen
+killBtn.AnchorPoint = Vector2.new(0, 0)
+killBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+killBtn.Text = "KILL SCRIPT"
+killBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+killBtn.Font = Enum.Font.GothamBold
+killBtn.TextSize = 20
+killBtn.ZIndex = 1000
+killBtn.Parent = game.Players.LocalPlayer.PlayerGui
+
+killBtn.MouseButton1Click:Connect(function()
+    if screenGui then screenGui:Destroy() end
+    killBtn:Destroy()
+    script:Destroy()
+end)
+
+print("Kill button created!") 
