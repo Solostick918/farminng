@@ -115,19 +115,31 @@ local autoBattleThread = nil
 local bossSafeTeleported = false
 local teleportPos = Vector3.new(10000, 500, 10000)
 
--- Try finding the Npc folder safely
-local function findNpcFolder()
-    local success, npcFolder = pcall(function()
-        local dungeonsWorld = workspace:WaitForChild("DungeonsWorld", 5)
-        for _, level1 in ipairs(dungeonsWorld:GetChildren()) do
-            for _, level2 in ipairs(level1:GetChildren()) do
-                if level2:FindFirstChild("Npc") then
-                    return level2.Npc
-                end
-            end
-        end
-    end)
-    return success and npcFolder or nil
+-- Define teleportToSafePlatform BEFORE auto battle logic
+local function teleportToSafePlatform()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        char:GetPropertyChangedSignal("Parent"):Wait()
+        hrp = char:WaitForChild("HumanoidRootPart")
+    end
+    print("[Teleport] Teleporting to safe platform...")
+    -- Create the platform if it doesn't exist
+    if not workspace:FindFirstChild("SafePlatform") then
+        local platform = Instance.new("Part")
+        platform.Size = Vector3.new(50, 1, 50)
+        platform.Position = teleportPos - Vector3.new(0, 3, 0)
+        platform.Anchored = true
+        platform.CanCollide = true
+        platform.Material = Enum.Material.SmoothPlastic
+        platform.Name = "SafePlatform"
+        platform.Parent = workspace
+        print("[Teleport] Created SafePlatform at", platform.Position)
+    end
+    -- Teleport the player
+    hrp.CFrame = CFrame.new(teleportPos)
+    print("[Teleport] Player teleported to", teleportPos)
 end
 
 -- Auto Battle Function
@@ -219,60 +231,17 @@ local autoChopButton = createToggleButton("Start Auto Chop", 150, function(isRun
     end
 end)
 
--- DEBUG KILL BUTTON (always visible, top right of screen)
-local killBtn = Instance.new("TextButton")
-killBtn.Size = UDim2.new(0, 120, 0, 50)
-killBtn.Position = UDim2.new(1, -130, 0, 10)
-killBtn.AnchorPoint = Vector2.new(0, 0)
-killBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-killBtn.Text = "KILL SCRIPT"
-killBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-killBtn.Font = Enum.Font.GothamBold
-killBtn.TextSize = 20
-killBtn.ZIndex = 1000
-killBtn.Parent = game.Players.LocalPlayer.PlayerGui
-
-killBtn.MouseButton1Click:Connect(function()
-    -- Stop all running threads and set flags to false
-    if autoBattleThread then
-        task.cancel(autoBattleThread)
-        autoBattleThread = nil
-    end
-    if autoChopThread then
-        task.cancel(autoChopThread)
-        autoChopThread = nil
-    end
-    isAutoBattleRunning = false
-    isAutoChopRunning = false
-    -- Remove GUI and kill button
-    if screenGui then screenGui:Destroy() end
-    killBtn:Destroy()
-end)
-
-print("Kill button created!")
-
-local function teleportToSafePlatform()
-    local player = game.Players.LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then
-        char:GetPropertyChangedSignal("Parent"):Wait()
-        hrp = char:WaitForChild("HumanoidRootPart")
-    end
-    print("[Teleport] Teleporting to safe platform...")
-    -- Create the platform if it doesn't exist
-    if not workspace:FindFirstChild("SafePlatform") then
-        local platform = Instance.new("Part")
-        platform.Size = Vector3.new(50, 1, 50)
-        platform.Position = teleportPos - Vector3.new(0, 3, 0)
-        platform.Anchored = true
-        platform.CanCollide = true
-        platform.Material = Enum.Material.SmoothPlastic
-        platform.Name = "SafePlatform"
-        platform.Parent = workspace
-        print("[Teleport] Created SafePlatform at", platform.Position)
-    end
-    -- Teleport the player
-    hrp.CFrame = CFrame.new(teleportPos)
-    print("[Teleport] Player teleported to", teleportPos)
+-- Try finding the Npc folder safely
+local function findNpcFolder()
+    local success, npcFolder = pcall(function()
+        local dungeonsWorld = workspace:WaitForChild("DungeonsWorld", 5)
+        for _, level1 in ipairs(dungeonsWorld:GetChildren()) do
+            for _, level2 in ipairs(level1:GetChildren()) do
+                if level2:FindFirstChild("Npc") then
+                    return level2.Npc
+                end
+            end
+        end
+    end)
+    return success and npcFolder or nil
 end 
