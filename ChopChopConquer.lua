@@ -111,6 +111,10 @@ end
 local isAutoBattleRunning = false
 local autoBattleThread = nil
 
+-- Boss Safe Teleport Variables
+local bossSafeTeleported = false
+local teleportPos = Vector3.new(10000, 500, 10000)
+
 -- Try finding the Npc folder safely
 local function findNpcFolder()
     local success, npcFolder = pcall(function()
@@ -138,6 +142,11 @@ local function startAutoBattle()
             if npcFolder then
                 local monsters = npcFolder:GetChildren()
                 if #monsters > 0 then
+                    -- Boss battle detected, teleport to safe platform if not already done
+                    if not bossSafeTeleported then
+                        bossSafeTeleported = true
+                        teleportToSafePlatform()
+                    end
                     for _, monster in ipairs(monsters) do
                         if not isAutoBattleRunning then break end
                         if monster:IsA("Model") then
@@ -151,9 +160,11 @@ local function startAutoBattle()
                         end
                     end
                 else
+                    bossSafeTeleported = false -- Reset for next boss battle
                     task.wait(2)
                 end
             else
+                bossSafeTeleported = false -- Reset if not in a battle
                 task.wait(3)
             end
         end
@@ -233,4 +244,27 @@ killBtn.MouseButton1Click:Connect(function()
     killBtn:Destroy()
 end)
 
-print("Kill button created!") 
+print("Kill button created!")
+
+local function teleportToSafePlatform()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    -- Create the platform if it doesn't exist
+    if not workspace:FindFirstChild("SafePlatform") then
+        local platform = Instance.new("Part")
+        platform.Size = Vector3.new(50, 1, 50)
+        platform.Position = teleportPos - Vector3.new(0, 3, 0)
+        platform.Anchored = true
+        platform.CanCollide = true
+        platform.Material = Enum.Material.SmoothPlastic
+        platform.Name = "SafePlatform"
+        platform.Parent = workspace
+    end
+
+    -- Teleport the player
+    hrp.CFrame = CFrame.new(teleportPos)
+    -- Optional: Anchor your character so you don't fall immediately
+    -- hrp.Anchored = true
+end 
