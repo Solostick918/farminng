@@ -153,8 +153,6 @@ local function startAutoBattle()
                         end
                     end
                 else
-                    -- No monsters: go to next dungeon
-                    nextDungeonRE:FireServer()
                     task.wait(2)
                 end
             else
@@ -188,32 +186,6 @@ local function startAutoChop()
             }
             hitTreesRE:FireServer(unpack(args))
             task.wait(0.1)
-        end
-    end)
-end
-
--- Auto Claim Gifts Variables
-local isAutoClaimGiftsRunning = false
-local autoClaimGiftsThread = nil
-
--- Auto Claim Gifts Function
-local function startAutoClaimGifts()
-    if autoClaimGiftsThread then
-        task.cancel(autoClaimGiftsThread)
-    end
-    autoClaimGiftsThread = task.spawn(function()
-        while isAutoClaimGiftsRunning do
-            for id = 1, 12 do
-                local args = {
-                    {
-                        Event = "Claim",
-                        Id = id
-                    }
-                }
-                onlineRewardRF:InvokeServer(unpack(args))
-                task.wait(0.2)
-            end
-            task.wait(2)
         end
     end)
 end
@@ -261,13 +233,6 @@ local autoChopButton = createToggleButton("Start Auto Chop", 150, function(isRun
     end
 end)
 
-local autoClaimGiftsButton = createToggleButton("Start Auto Claim Gifts", 200, function(isRunning)
-    isAutoClaimGiftsRunning = isRunning
-    if isRunning then
-        startAutoClaimGifts()
-    end
-end)
-
 -- Kill Function
 local function killScript()
     -- Stop all running threads
@@ -279,15 +244,10 @@ local function killScript()
         task.cancel(autoChopThread)
         autoChopThread = nil
     end
-    if autoClaimGiftsThread then
-        task.cancel(autoClaimGiftsThread)
-        autoClaimGiftsThread = nil
-    end
     
     -- Reset states
     isAutoBattleRunning = false
     isAutoChopRunning = false
-    isAutoClaimGiftsRunning = false
     
     -- Update button states
     if autoBattleButton then
@@ -297,10 +257,6 @@ local function killScript()
     if autoChopButton then
         autoChopButton.Text = "Start Auto Chop"
         autoChopButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    end
-    if autoClaimGiftsButton then
-        autoClaimGiftsButton.Text = "Start Auto Claim Gifts"
-        autoClaimGiftsButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     end
     
     -- Remove the GUI
@@ -335,13 +291,8 @@ killBtn.MouseButton1Click:Connect(function()
         task.cancel(autoChopThread)
         autoChopThread = nil
     end
-    if autoClaimGiftsThread then
-        task.cancel(autoClaimGiftsThread)
-        autoClaimGiftsThread = nil
-    end
     isAutoBattleRunning = false
     isAutoChopRunning = false
-    isAutoClaimGiftsRunning = false
     -- Remove GUI and kill button
     if screenGui then screenGui:Destroy() end
     killBtn:Destroy()
