@@ -135,10 +135,8 @@ local function startAutoBattle()
     autoBattleThread = task.spawn(function()
         while isAutoBattleRunning do
             local npcFolder = findNpcFolder()
-            
             if npcFolder then
                 local monsters = npcFolder:GetChildren()
-                
                 if #monsters > 0 then
                     for _, monster in ipairs(monsters) do
                         if not isAutoBattleRunning then break end
@@ -190,34 +188,6 @@ local function startAutoChop()
     end)
 end
 
--- Create Kill Button (moved before other buttons to ensure it's created)
-local killButton = Instance.new("TextButton")
-killButton.Size = UDim2.new(0.9, 0, 0, 40)
-killButton.Position = UDim2.new(0.05, 0, 0, 50)  -- Moved to top position
-killButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-killButton.BorderSizePixel = 0
-killButton.Text = "KILL SCRIPT"
-killButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-killButton.Font = Enum.Font.GothamBold  -- Made text bold
-killButton.TextSize = 16  -- Made text bigger
-killButton.Parent = mainFrame
-
-local killButtonCorner = Instance.new("UICorner")
-killButtonCorner.CornerRadius = UDim.new(0, 6)
-killButtonCorner.Parent = killButton
-
--- Hover effects for kill button
-killButton.MouseEnter:Connect(function()
-    killButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
-end)
-
-killButton.MouseLeave:Connect(function()
-    killButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-end)
-
--- Connect kill button
-killButton.MouseButton1Click:Connect(killScript)
-
 -- Create Toggle Buttons (moved after kill button)
 local autoBattleButton = createToggleButton("Start Auto Battle", 100, function(isRunning)
     isAutoBattleRunning = isRunning
@@ -232,41 +202,6 @@ local autoChopButton = createToggleButton("Start Auto Chop", 150, function(isRun
         startAutoChop()
     end
 end)
-
--- Kill Function
-local function killScript()
-    -- Stop all running threads
-    if autoBattleThread then
-        task.cancel(autoBattleThread)
-        autoBattleThread = nil
-    end
-    if autoChopThread then
-        task.cancel(autoChopThread)
-        autoChopThread = nil
-    end
-    
-    -- Reset states
-    isAutoBattleRunning = false
-    isAutoChopRunning = false
-    
-    -- Update button states
-    if autoBattleButton then
-        autoBattleButton.Text = "Start Auto Battle"
-        autoBattleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    end
-    if autoChopButton then
-        autoChopButton.Text = "Start Auto Chop"
-        autoChopButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    end
-    
-    -- Remove the GUI
-    if screenGui then
-        screenGui:Destroy()
-    end
-    
-    -- Remove the script
-    script:Destroy()
-end
 
 -- DEBUG KILL BUTTON (always visible, top right of screen)
 local killBtn = Instance.new("TextButton")
