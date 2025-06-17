@@ -2,7 +2,7 @@
 
 local player = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
-local events = rs:WaitForChild("Events")
+local remoteEvent = rs:WaitForChild("RemoteEvent")
 
 -- Modern GUI Styles
 local COLORS = {
@@ -15,6 +15,13 @@ local COLORS = {
     WARNING = Color3.fromRGB(255, 170, 0),    -- Orange
     DANGER = Color3.fromRGB(255, 50, 50),     -- Red
     TOPBAR = Color3.fromRGB(30, 40, 60)       -- Subtle blue-gray
+}
+
+-- Mining block IDs
+local MINING_BLOCKS = {
+    "p1143", "p721", "p727", "p734", "p741", "p748", "p755", "p1146", 
+    "p1145", "p1170", "p1167", "p708", "p728", "p700", "p701", "p699", 
+    "p714", "p715"
 }
 
 -- Create GUI
@@ -143,41 +150,18 @@ local autoMineButton = createToggleButton("Start Auto Mining", y, function(isRun
     if isRunning then
         task.spawn(function()
             while isRunning do
-                -- Find ores around the player
-                local character = player.Character
-                if character then
-                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-                    if humanoidRootPart then
-                        local ores = workspace:FindFirstChild("Ores")
-                        if ores then
-                            for _, ore in pairs(ores:GetChildren()) do
-                                if ore:IsA("BasePart") then
-                                    local distance = (ore.Position - humanoidRootPart.Position).Magnitude
-                                    if distance <= 10 then -- Adjust this value based on your game's needs
-                                        local args = {ore}
-                                        events:WaitForChild("MineOre"):FireServer(unpack(args))
-                                        task.wait(0.3) -- Increased delay to avoid getting kicked
-                                    end
-                                end
-                            end
-                        end
-                    end
+                for _, blockId in ipairs(MINING_BLOCKS) do
+                    if not isRunning then break end
+                    local args = {
+                        {
+                            id = "d",
+                            brickId = blockId
+                        }
+                    }
+                    remoteEvent:FireServer(unpack(args))
+                    task.wait(0.3) -- Delay between mining attempts
                 end
-                task.wait(0.5) -- Increased check interval to be more conservative
-            end
-        end)
-    end
-end)
-y = y + 45
-
--- Auto Selling Section
-local autoSellButton = createToggleButton("Start Auto Selling", y, function(isRunning)
-    if isRunning then
-        task.spawn(function()
-            while isRunning do
-                local args = {"Sell"}
-                events:WaitForChild("ToServer"):FireServer(unpack(args))
-                task.wait(1) -- Sell every second
+                task.wait(0.5) -- Delay before starting the next cycle
             end
         end)
     end
