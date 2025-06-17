@@ -203,6 +203,45 @@ local autoChopButton = createToggleButton("Start Auto Chop", 150, function(isRun
     end
 end)
 
+-- Teleport to Safe Area Button
+local function createTeleportButton(text, y, teleportPos)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0.9, 0, 0, 40)
+    button.Position = UDim2.new(0.05, 0, 0, y)
+    button.BackgroundColor3 = Color3.fromRGB(80, 80, 200)
+    button.BorderSizePixel = 0
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.GothamSemibold
+    button.TextSize = 14
+    button.Parent = mainFrame
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.Parent = button
+    button.MouseButton1Click:Connect(function()
+        local player = game.Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        -- Create the platform if it doesn't exist
+        if not workspace:FindFirstChild("SafePlatform") then
+            local platform = Instance.new("Part")
+            platform.Size = Vector3.new(50, 1, 50)
+            platform.Position = teleportPos - Vector3.new(0, 3, 0)
+            platform.Anchored = true
+            platform.CanCollide = true
+            platform.Material = Enum.Material.SmoothPlastic
+            platform.Name = "SafePlatform"
+            platform.Parent = workspace
+        end
+        -- Teleport the player
+        hrp.CFrame = CFrame.new(teleportPos)
+    end)
+    return button
+end
+
+-- Place the teleport button below the other buttons
+createTeleportButton("Teleport to Safe Area", 250, Vector3.new(10000, 500, 10000))
+
 -- DEBUG KILL BUTTON (always visible, top right of screen)
 local killBtn = Instance.new("TextButton")
 killBtn.Size = UDim2.new(0, 120, 0, 50)
