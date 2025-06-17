@@ -188,15 +188,43 @@ local function startAutoChop()
     end)
 end
 
--- Create Toggle Buttons
-local autoBattleButton = createToggleButton("Start Auto Battle", 50, function(isRunning)
+-- Create Kill Button (moved before other buttons to ensure it's created)
+local killButton = Instance.new("TextButton")
+killButton.Size = UDim2.new(0.9, 0, 0, 40)
+killButton.Position = UDim2.new(0.05, 0, 0, 50)  -- Moved to top position
+killButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+killButton.BorderSizePixel = 0
+killButton.Text = "KILL SCRIPT"
+killButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+killButton.Font = Enum.Font.GothamBold  -- Made text bold
+killButton.TextSize = 16  -- Made text bigger
+killButton.Parent = mainFrame
+
+local killButtonCorner = Instance.new("UICorner")
+killButtonCorner.CornerRadius = UDim.new(0, 6)
+killButtonCorner.Parent = killButton
+
+-- Hover effects for kill button
+killButton.MouseEnter:Connect(function()
+    killButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+end)
+
+killButton.MouseLeave:Connect(function()
+    killButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+end)
+
+-- Connect kill button
+killButton.MouseButton1Click:Connect(killScript)
+
+-- Create Toggle Buttons (moved after kill button)
+local autoBattleButton = createToggleButton("Start Auto Battle", 100, function(isRunning)
     isAutoBattleRunning = isRunning
     if isRunning then
         startAutoBattle()
     end
 end)
 
-local autoChopButton = createToggleButton("Start Auto Chop", 100, function(isRunning)
+local autoChopButton = createToggleButton("Start Auto Chop", 150, function(isRunning)
     isAutoChopRunning = isRunning
     if isRunning then
         startAutoChop()
@@ -236,32 +264,4 @@ local function killScript()
     
     -- Remove the script
     script:Destroy()
-end
-
--- Create Kill Button
-local killButton = Instance.new("TextButton")
-killButton.Size = UDim2.new(0.9, 0, 0, 40)
-killButton.Position = UDim2.new(0.05, 0, 0, 150)
-killButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-killButton.BorderSizePixel = 0
-killButton.Text = "Kill Script"
-killButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-killButton.Font = Enum.Font.GothamSemibold
-killButton.TextSize = 14
-killButton.Parent = mainFrame
-
-local killButtonCorner = Instance.new("UICorner")
-killButtonCorner.CornerRadius = UDim.new(0, 6)
-killButtonCorner.Parent = killButton
-
--- Hover effects for kill button
-killButton.MouseEnter:Connect(function()
-    killButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
-end)
-
-killButton.MouseLeave:Connect(function()
-    killButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-end)
-
--- Connect kill button
-killButton.MouseButton1Click:Connect(killScript) 
+end 
