@@ -141,30 +141,35 @@ local function startAutoBattle()
             local npcFolder = findNpcFolder()
             if npcFolder then
                 local monsters = npcFolder:GetChildren()
+                print("[AutoBattle] Found NPC folder with", #monsters, "monsters.")
                 if #monsters > 0 then
                     -- Boss battle detected, teleport to safe platform if not already done
                     if not bossSafeTeleported then
                         bossSafeTeleported = true
+                        print("[AutoBattle] Boss detected, teleporting to safe platform.")
                         teleportToSafePlatform()
                     end
                     for _, monster in ipairs(monsters) do
                         if not isAutoBattleRunning then break end
                         if monster:IsA("Model") then
+                            print("[AutoBattle] Attacking monster:", monster.Name)
                             local args = {monster}
                             local attackData = {
                                 ownerType = "Character",
                                 currentAttacks = { Common = true }
                             }
                             weaponHitRE:FireServer(args, attackData)
-                            task.wait(0.2)
                         end
+                        task.wait(0.2)
                     end
                 else
                     bossSafeTeleported = false -- Reset for next boss battle
+                    print("[AutoBattle] No monsters found, waiting...")
                     task.wait(2)
                 end
             else
                 bossSafeTeleported = false -- Reset if not in a battle
+                print("[AutoBattle] No NPC folder found, waiting...")
                 task.wait(3)
             end
         end
@@ -249,8 +254,12 @@ print("Kill button created!")
 local function teleportToSafePlatform()
     local player = game.Players.LocalPlayer
     local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        char:GetPropertyChangedSignal("Parent"):Wait()
+        hrp = char:WaitForChild("HumanoidRootPart")
+    end
+    print("[Teleport] Teleporting to safe platform...")
     -- Create the platform if it doesn't exist
     if not workspace:FindFirstChild("SafePlatform") then
         local platform = Instance.new("Part")
@@ -261,10 +270,9 @@ local function teleportToSafePlatform()
         platform.Material = Enum.Material.SmoothPlastic
         platform.Name = "SafePlatform"
         platform.Parent = workspace
+        print("[Teleport] Created SafePlatform at", platform.Position)
     end
-
     -- Teleport the player
     hrp.CFrame = CFrame.new(teleportPos)
-    -- Optional: Anchor your character so you don't fall immediately
-    -- hrp.Anchored = true
+    print("[Teleport] Player teleported to", teleportPos)
 end 
