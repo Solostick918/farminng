@@ -4,6 +4,9 @@ local player = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 local remoteEvent = rs:WaitForChild("RemoteEvent")
 
+-- Debug print to verify RemoteEvent connection
+print("RemoteEvent found:", remoteEvent.Name)
+
 -- Modern GUI Styles
 local COLORS = {
     PRIMARY = Color3.fromRGB(0, 170, 255),    -- Blue
@@ -148,6 +151,7 @@ local y = 8
 -- Auto Mining Section
 local autoMineButton = createToggleButton("Start Auto Mining", y, function(isRunning)
     if isRunning then
+        print("Auto mining started")
         task.spawn(function()
             while isRunning do
                 for _, blockId in ipairs(MINING_BLOCKS) do
@@ -158,12 +162,15 @@ local autoMineButton = createToggleButton("Start Auto Mining", y, function(isRun
                             brickId = blockId
                         }
                     }
+                    print("Attempting to mine block:", blockId)
                     remoteEvent:FireServer(unpack(args))
                     task.wait(0.3) -- Delay between mining attempts
                 end
                 task.wait(0.5) -- Delay before starting the next cycle
             end
         end)
+    else
+        print("Auto mining stopped")
     end
 end)
 y = y + 45
