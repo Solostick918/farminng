@@ -5,6 +5,7 @@ local rs = game:GetService("ReplicatedStorage")
 local weaponHitRE = rs:WaitForChild("RemoteEvents"):WaitForChild("WeaponHitRE")
 local hitTreesRE = rs:WaitForChild("RemoteEvents"):WaitForChild("HitTreesRE")
 local nextDungeonRE = rs:WaitForChild("RemoteEvents"):WaitForChild("NextDungeonRE")
+local onlineRewardRF = rs:WaitForChild("RemoteFunctions"):WaitForChild("OnlineRewardRF")
 
 -- Create GUI
 local screenGui = Instance.new("ScreenGui")
@@ -191,6 +192,32 @@ local function startAutoChop()
     end)
 end
 
+-- Auto Claim Gifts Variables
+local isAutoClaimGiftsRunning = false
+local autoClaimGiftsThread = nil
+
+-- Auto Claim Gifts Function
+local function startAutoClaimGifts()
+    if autoClaimGiftsThread then
+        task.cancel(autoClaimGiftsThread)
+    end
+    autoClaimGiftsThread = task.spawn(function()
+        while isAutoClaimGiftsRunning do
+            for id = 1, 12 do
+                local args = {
+                    {
+                        Event = "Claim",
+                        Id = id
+                    }
+                }
+                onlineRewardRF:InvokeServer(unpack(args))
+                task.wait(0.2)
+            end
+            task.wait(2)
+        end
+    end)
+end
+
 -- Create Kill Button (moved before other buttons to ensure it's created)
 local killButton = Instance.new("TextButton")
 killButton.Size = UDim2.new(0.9, 0, 0, 40)
@@ -234,6 +261,13 @@ local autoChopButton = createToggleButton("Start Auto Chop", 150, function(isRun
     end
 end)
 
+local autoClaimGiftsButton = createToggleButton("Start Auto Claim Gifts", 200, function(isRunning)
+    isAutoClaimGiftsRunning = isRunning
+    if isRunning then
+        startAutoClaimGifts()
+    end
+end)
+
 -- Kill Function
 local function killScript()
     -- Stop all running threads
@@ -245,10 +279,15 @@ local function killScript()
         task.cancel(autoChopThread)
         autoChopThread = nil
     end
+    if autoClaimGiftsThread then
+        task.cancel(autoClaimGiftsThread)
+        autoClaimGiftsThread = nil
+    end
     
     -- Reset states
     isAutoBattleRunning = false
     isAutoChopRunning = false
+    isAutoClaimGiftsRunning = false
     
     -- Update button states
     if autoBattleButton then
@@ -258,6 +297,10 @@ local function killScript()
     if autoChopButton then
         autoChopButton.Text = "Start Auto Chop"
         autoChopButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    end
+    if autoClaimGiftsButton then
+        autoClaimGiftsButton.Text = "Start Auto Claim Gifts"
+        autoClaimGiftsButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     end
     
     -- Remove the GUI
@@ -272,7 +315,7 @@ end
 -- DEBUG KILL BUTTON (always visible, top right of screen)
 local killBtn = Instance.new("TextButton")
 killBtn.Size = UDim2.new(0, 120, 0, 50)
-killBtn.Position = UDim2.new(1, -130, 0, 10) -- Top right corner of the screen
+killBtn.Position = UDim2.new(1, -130, 0, 10)
 killBtn.AnchorPoint = Vector2.new(0, 0)
 killBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 killBtn.Text = "KILL SCRIPT"
@@ -292,9 +335,13 @@ killBtn.MouseButton1Click:Connect(function()
         task.cancel(autoChopThread)
         autoChopThread = nil
     end
+    if autoClaimGiftsThread then
+        task.cancel(autoClaimGiftsThread)
+        autoClaimGiftsThread = nil
+    end
     isAutoBattleRunning = false
     isAutoChopRunning = false
-
+    isAutoClaimGiftsRunning = false
     -- Remove GUI and kill button
     if screenGui then screenGui:Destroy() end
     killBtn:Destroy()
