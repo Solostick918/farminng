@@ -283,9 +283,21 @@ killBtn.ZIndex = 1000
 killBtn.Parent = game.Players.LocalPlayer.PlayerGui
 
 killBtn.MouseButton1Click:Connect(function()
+    -- Stop all running threads and set flags to false
+    if autoBattleThread then
+        task.cancel(autoBattleThread)
+        autoBattleThread = nil
+    end
+    if autoChopThread then
+        task.cancel(autoChopThread)
+        autoChopThread = nil
+    end
+    isAutoBattleRunning = false
+    isAutoChopRunning = false
+
+    -- Remove GUI and kill button
     if screenGui then screenGui:Destroy() end
     killBtn:Destroy()
-    script:Destroy()
 end)
 
 print("Kill button created!") 
