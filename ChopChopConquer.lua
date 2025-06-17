@@ -4,6 +4,7 @@ local player = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 local weaponHitRE = rs:WaitForChild("RemoteEvents"):WaitForChild("WeaponHitRE")
 local hitTreesRE = rs:WaitForChild("RemoteEvents"):WaitForChild("HitTreesRE")
+local nextDungeonRE = rs:WaitForChild("RemoteEvents"):WaitForChild("NextDungeonRE")
 
 -- Create GUI
 local screenGui = Instance.new("ScreenGui")
@@ -151,6 +152,8 @@ local function startAutoBattle()
                         end
                     end
                 else
+                    -- No monsters: go to next dungeon
+                    nextDungeonRE:FireServer()
                     task.wait(2)
                 end
             else
@@ -183,7 +186,7 @@ local function startAutoChop()
                 }
             }
             hitTreesRE:FireServer(unpack(args))
-            task.wait(0.5)
+            task.wait(0.1)
         end
     end)
 end
